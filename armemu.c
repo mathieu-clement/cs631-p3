@@ -47,6 +47,11 @@ unsigned int get_rn (unsigned int instr)
     return (0x000F0000 & instr) >> 16;
 }
 
+unsigned int get_rd (unsigned int instr)
+{
+    return (0x0000F000 & instr) >> 12;
+}
+
 void print_instr(unsigned int i)
 {
     printf("cond: %u\n"
@@ -62,8 +67,8 @@ void print_instr(unsigned int i)
            (0x02000000 & i) >> 25, // I
            (0x01E00000 & i) >> 21, // cmd
            (0x00100000 & i) >> 20, // S
-           get_rn(i), // Rn
-           (0x0000F000 & i) >> 12, // Rd
+           get_rn(i),
+           get_rd(i),
            (0x00000FFF & i)        // Src2
            );
 }
@@ -72,9 +77,9 @@ void armemu_one(struct state* s)
 {
     unsigned int* pc_addr = (unsigned int*) s->regs[PC];
     print_instr(*pc_addr);
-//    if (instr->rn != PC) {
-//        s->regs[PC] = s->regs[PC] + 4;
-//    }
+    if (get_rd(*pc_addr) != PC) {
+        s->regs[PC] = s->regs[PC] + 4;
+    }
 }
 
 void armemu(struct state* s)
