@@ -26,7 +26,12 @@ void init_state(struct state* s, func f,
 {
     printf("%d %d %d %d\n", r0, r1, r2, r3);
 
-    for (int i = 0 ; i < NUM_REGS ; ++i) {
+    s->regs[0] = r0;
+    s->regs[1] = r1;
+    s->regs[2] = r2;
+    s->regs[3] = r3;
+
+    for (int i = 4 ; i < NUM_REGS ; ++i) {
         s->regs[i] = 0;
     }
 
