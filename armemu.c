@@ -42,6 +42,11 @@ void init_state(struct state* s, func f,
     s->regs[LR] = 0;
 }
 
+unsigned int get_rn (unsigned int instr)
+{
+    return (0x000F0000 & instr) >> 16;
+}
+
 void print_instr(unsigned int i)
 {
     printf("cond: %u\n"
@@ -57,7 +62,7 @@ void print_instr(unsigned int i)
            (0x02000000 & i) >> 25, // I
            (0x01E00000 & i) >> 21, // cmd
            (0x00100000 & i) >> 20, // S
-           (0x000F0000 & i) >> 16, // Rn
+           get_rn(i), // Rn
            (0x0000F000 & i) >> 12, // Rd
            (0x00000FFF & i)        // Src2
            );
