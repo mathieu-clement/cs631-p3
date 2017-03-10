@@ -1,4 +1,4 @@
-CFLAGS=-g -O0 -W -Wall -Werror -std=c11
+CFLAGS=-g -O0 -W -Wall -std=c11
 LDFLAGS=
 DEPS=add.o
 OBJS=armemu.o $(DEPS)
