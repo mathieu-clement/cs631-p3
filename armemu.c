@@ -72,8 +72,7 @@ void armemu(struct state* s)
     int i = 0;
 //    while(s->regs[PC] != 0) {
     for ( ; i < 4 ; ++i) {
-        printf("%d:\n", i); armemu_one(s); i++;
-        printf("%d:\n", i); armemu_one(s); i++;
+        printf("%d:\n", i); armemu_one(s); 
     }
 }
 
