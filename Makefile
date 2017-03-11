@@ -1,6 +1,6 @@
 CFLAGS=-g -O0 -W -Wall -std=c11
 LDFLAGS=
-DEPS=add.o
+DEPS=add_function.o
 OBJS=armemu.o $(DEPS)
 PROG=armemu
 CC=clang
