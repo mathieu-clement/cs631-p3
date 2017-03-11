@@ -18,16 +18,12 @@ struct state {
 
 unsigned int select_bits(unsigned int src, int high, int low)
 {
-    unsigned int mask = 0;
+    unsigned int mask = 0xFFFFFFFF;
     int nb_ones = 1 + high - low;
 
-    for (int i = 0 ; i < nb_ones ; ++i) {
-        mask <<= 1;
-        mask |= 1;
-    }
+    mask >>= 32 - nb_ones;
 
     int shift = high - nb_ones + 1;
-    
     mask <<= shift;
     return (mask & src) >> shift;
 }
