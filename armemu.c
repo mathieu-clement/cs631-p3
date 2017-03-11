@@ -16,6 +16,50 @@ struct state {
     unsigned int stack[STACK_SIZE];
 };
 
+unsigned int select_bits(unsigned int src, int high, int low)
+{
+    unsigned int mask = 0;
+    int nb_ones = 1 + high - low;
+
+    for (int i = 0 ; i < nb_ones ; ++i) {
+        mask <<= 1;
+        mask |= 1;
+    }
+
+    int shift = high - nb_ones + 1;
+    
+    mask <<= shift;
+    return (mask & src) >> shift;
+}
+
+// Data processing instruction
+// DDCA, page 330
+// Due to endianness, wasn't able to use the bitfield directly
+struct dp_instr {
+    unsigned int cond  :  4  ;
+    unsigned int op    :  2  ;
+    unsigned int i     :  1  ;
+    unsigned int cmd   :  4  ;
+    unsigned int s     :  1  ;
+    unsigned int rn    :  4  ;
+    unsigned int rd    :  4  ;
+    unsigned int src2  : 12  ;
+};
+
+struct dp_instr decode_dp_instr (unsigned int raw)
+{
+    return (struct dp_instr) {
+        .cond   =     select_bits(raw, 31, 28) ,
+        .op     =     select_bits(raw, 27, 26) ,
+        .i      =     select_bits(raw, 25, 25) ,
+        .cmd    =     select_bits(raw, 24, 21) ,
+        .s      =     select_bits(raw, 20, 20) ,
+        .rn     =     select_bits(raw, 19, 16) ,
+        .rd     =     select_bits(raw, 15, 12) ,
+        .src2   =     select_bits(raw, 11, 0) 
+    };
+}
+
 typedef unsigned int (*func)(unsigned int, unsigned int, unsigned int, unsigned int);
 
 void init_state(struct state* s, func f, 
@@ -26,12 +70,7 @@ void init_state(struct state* s, func f,
 {
     printf("%d %d %d %d\n", r0, r1, r2, r3);
 
-    s->regs[0] = r0;
-    s->regs[1] = r1;
-    s->regs[2] = r2;
-    s->regs[3] = r3;
-
-    for (int i = 4 ; i < NUM_REGS ; ++i) {
+    for (int i = 0 ; i < NUM_REGS ; ++i) {
         s->regs[i] = 0;
     }
 
@@ -42,17 +81,7 @@ void init_state(struct state* s, func f,
     s->regs[LR] = 0;
 }
 
-unsigned int get_rn (unsigned int instr)
-{
-    return (0x000F0000 & instr) >> 16;
-}
-
-unsigned int get_rd (unsigned int instr)
-{
-    return (0x0000F000 & instr) >> 12;
-}
-
-void print_instr(unsigned int i)
+void print_instr(struct dp_instr* i)
 {
     printf("cond: %u\n"
            "  op: %u\n"
@@ -62,22 +91,23 @@ void print_instr(unsigned int i)
            "  Rn: %u\n"
            "  Rd: %u\n"
            "Src2: %u\n",
-           (0xF0000000 & i) >> 28, // cond
-           (0x0C000000 & i) >> 26, // op
-           (0x02000000 & i) >> 25, // I
-           (0x01E00000 & i) >> 21, // cmd
-           (0x00100000 & i) >> 20, // S
-           get_rn(i),
-           get_rd(i),
-           (0x00000FFF & i)        // Src2
+           i->cond,
+           i->op,
+           i->i,
+           i->cmd,
+           i->s,
+           i->rn,
+           i->rd,
+           i->src2
            );
 }
 
 void armemu_one(struct state* s)
 {
     unsigned int* pc_addr = (unsigned int*) s->regs[PC];
-    print_instr(*pc_addr);
-    if (get_rd(*pc_addr) != PC) {
+    struct dp_instr dp_instr = decode_dp_instr(*pc_addr);
+    print_instr(&dp_instr);
+    if (dp_instr.rn != PC) {
         s->regs[PC] = s->regs[PC] + 4;
     }
 }
