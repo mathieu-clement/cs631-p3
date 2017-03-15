@@ -361,11 +361,11 @@ void armemu_one (struct state* s)
 void armemu(struct state* s)
 {
     int i = 0;
-    while (s->regs[PC] != 0 && i < 15) {
+    while (s->regs[PC] != 0) {
         printf("Instruction #%d:\n", i); armemu_one(s); 
         i++;
     }
-    printf("NOTE: Emulator stops after 15 instructions. \n");
+    printf("NOTE: Emulator stopped after %d instructions. \n", i);
 }
 
 
