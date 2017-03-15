@@ -272,7 +272,58 @@ struct load_store_instr decode_load_store_instr (unsigned int raw)
     };
 }
 
-void armemu_one(struct state* s)
+void armemu_one_load_store (struct state* s, struct load_store_instr* instr)
+{
+    unsigned int* mem_addr = (unsigned int*) s->regs[instr->rn];
+    unsigned int offset = 0;
+
+    if (instr->p == 0) {
+        fprintf(stderr, "Post offset for load / store instruction is not supported\n");
+        exit(EXIT_FAILURE);
+    }
+    if (instr->w == 1) {
+        fprintf(stderr, "Write-back for load / store instruction is not supported\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (instr->i == 1) {
+        // Immediate offset
+        if (instr->u == 0) { // offset not Up => subtract offset from rd
+            offset = - (instr->offset);
+        } else {
+            offset = + (instr->offset);
+        } // end if offset up
+    } else {
+        // Register offset
+        unsigned int rm = select_bits(instr->offset, 3, 0);
+        unsigned int rm_val = s->regs[rm];
+        unsigned int shift = select_bits(instr->offset, 11, 4);
+        if (shift != 0) {
+            rm_val <<= shift;
+        }
+        offset = rm_val;
+    } // end if immediate
+
+    mem_addr += offset;
+
+    unsigned int rd = instr->rd;
+
+    if  (instr->l == 1) {
+        // LOAD data from mem_addr to rd
+        s->regs[rd] = *mem_addr;
+        if (instr->b == 1) {
+            s->regs[rd] &= 0x000000FF;
+        } // end if byte
+    } else {
+        // STORE data from rd to mem_addr
+        *mem_addr = s->regs[rd];
+        if (instr->b == 1) {
+            *mem_addr &= 0x000000FF;
+        } // end if byte
+    } // end if load
+} // end armemu_one_load_store
+
+void armemu_one (struct state* s)
 {
     unsigned int* pc_addr = (unsigned int*) s->regs[PC];
     debug("PC is at address 0x%02x", s->regs[PC]);
@@ -286,6 +337,7 @@ void armemu_one(struct state* s)
         case 0x01: // Data transfer (LDR, STR)
             {
                 struct load_store_instr instr = decode_load_store_instr(*pc_addr);
+                armemu_one_load_store(s, &instr);
                 break;
             }
         case 0x02: // Branch and link
