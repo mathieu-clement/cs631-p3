@@ -356,6 +356,7 @@ void armemu_one (struct state* s)
         default:
             fprintf(stderr, "Unknown instruction type (op) %02x.\n",
                     dp_instr.op);
+            exit(EXIT_FAILURE);
     }
 
     // Update PC
