@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define DEBUG 1
 #include "debug_utils.h"
@@ -375,6 +376,12 @@ void armemu(struct state* s)
     printf("NOTE: Emulator stopped after %d instructions. \n", i);
 }
 
+func find_func (char* name)
+{
+    if (strcmp(name, "add_function") == 0) return add_function;
+    
+    return NULL;
+}
 
 int main (int argc, char* argv[])
 {
@@ -385,7 +392,13 @@ int main (int argc, char* argv[])
 
     struct state state = { };
 
-    init_state(&state, add_function, 10, 11, 12, 13);
+    func func = find_func(argv[1]);
+    if (!func) {
+        fprintf(stderr, "Function %s could not be found.\n", argv[1]);
+        exit(EXIT_FAILURE);
+    }
+
+    init_state(&state, func, 10, 11, 12, 13);
     armemu(&state);
     printf("r = %d\n", state.regs[0]);
 }
