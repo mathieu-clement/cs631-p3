@@ -108,6 +108,10 @@ void init_state(struct state* s,
     s->regs[SP] = (unsigned int) &(s->stack[STACK_SIZE+1]);
     s->regs[PC] = (unsigned int) f;
     s->regs[LR] = 0;
+
+    debug("SP = 0x%02x", s->regs[SP]);
+    debug("PC = 0x%02x", s->regs[PC]);
+    debug("LR = 0x%02x", s->regs[LR]);
 }
 
 int rotate_immediate (int rot, int imm8)
@@ -280,6 +284,8 @@ void armemu_one_load_store (struct state* s, struct load_store_instr* instr)
     unsigned int* mem_addr = (unsigned int*) s->regs[instr->rn];
     unsigned int offset = 0;
 
+    debug("rn: r%d, rd: r%d, raw offset value: 0x%02x", instr->rn, instr->rd, instr->offset);
+
     if (instr->p == 0) {
         fprintf(stderr, "Post offset for load / store instruction is not supported\n");
         exit(EXIT_FAILURE);
@@ -289,18 +295,20 @@ void armemu_one_load_store (struct state* s, struct load_store_instr* instr)
         exit(EXIT_FAILURE);
     }
 
-    if (instr->i == 1) {
+    if (instr->i == 0) {
         // Immediate offset
         if (instr->u == 0) { // offset not Up => subtract offset from rd
             offset = - (instr->offset);
         } else {
             offset = + (instr->offset);
         } // end if offset up
+        debug("Immediate offset: 0x%02x (up: %d)", instr->offset, instr->u);
     } else {
         // Register offset
         unsigned int rm = select_bits(instr->offset, 3, 0);
         unsigned int rm_val = s->regs[rm];
         unsigned int shift = select_bits(instr->offset, 11, 4);
+        debug("Offset %d shifted by %d from register r%d", rm_val, shift, rm);
         if (shift != 0) {
             rm_val <<= shift;
         }
