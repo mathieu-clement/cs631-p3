@@ -241,6 +241,37 @@ void armemu_one_branch(struct state* state, struct branch_link_instr* instr)
     state->regs[PC] = state->regs[PC] + 8 + signed_offset; // 8 simulates prefetch
 }
 
+struct load_store_instr {
+    unsigned int cond   :  4 ;
+    unsigned int op     :  2 ;
+    unsigned int i      :  1 ;
+    unsigned int p      :  1 ;
+    unsigned int u      :  1 ;
+    unsigned int b      :  1 ;
+    unsigned int w      :  1 ;
+    unsigned int l      :  1 ;
+    unsigned int rn     :  4 ;
+    unsigned int rd     :  4 ;
+    unsigned int offset : 12 ;
+};
+
+struct load_store_instr decode_load_store_instr (unsigned int raw)
+{
+    return (struct load_store_instr) {
+        .cond   = select_bits(raw, 31, 28),
+        .op     = select_bits(raw, 27, 26),
+        .i      = select_bits(raw, 25, 25),
+        .p      = select_bits(raw, 24, 24),
+        .u      = select_bits(raw, 23, 23),
+        .b      = select_bits(raw, 22, 22),
+        .w      = select_bits(raw, 21, 21),
+        .l      = select_bits(raw, 20, 20),
+        .rn     = select_bits(raw, 19, 16),
+        .rd     = select_bits(raw, 15, 12),
+        .offset = select_bits(raw, 12, 0)
+    };
+}
+
 void armemu_one(struct state* s)
 {
     unsigned int* pc_addr = (unsigned int*) s->regs[PC];
@@ -252,7 +283,12 @@ void armemu_one(struct state* s)
         case 0x00: // Data processing
             armemu_one_dp(s, &dp_instr);
             break;
-        case 0x02:
+        case 0x01: // Data transfer (LDR, STR)
+            {
+                struct load_store_instr instr = decode_load_store_instr(*pc_addr);
+                break;
+            }
+        case 0x02: // Branch and link
             { // scope required due to declared variables
                 debug("Branch, and maybe link", NULL);
                 struct branch_link_instr bl_instr = decode_branch_link_instr(*pc_addr);
