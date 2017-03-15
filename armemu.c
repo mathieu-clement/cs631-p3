@@ -51,13 +51,6 @@ struct dp_src2_reg_shifted {
     unsigned int rm           : 4 ;
 };
 
-// Data Processing operand Src2
-union dp_src2 {
-    struct dp_src2_immediate    immediate;
-    struct dp_src2_reg          reg;
-    struct dp_src2_reg_shifted  reg_shifted;
-};
-
 // Data processing instruction
 // DDCA, page 330
 // Due to endianness, wasn't able to use the bitfield directly
@@ -89,7 +82,8 @@ struct dp_instr decode_dp_instr (unsigned int raw)
 // Assembly function signature
 typedef unsigned int (*func)(unsigned int, unsigned int, unsigned int, unsigned int);
 
-void init_state(struct state* s, func f, 
+void init_state(struct state* s, 
+                func f, 
                 unsigned int r0, 
                 unsigned int r1,
                 unsigned int r2,
@@ -114,20 +108,37 @@ int rotate_immediate (int rot, int imm8)
     return (imm8 << rot)|(imm8 >> (32 - rot));
 }
 
+struct dp_src2_immediate decode_dp_src2_immediate (unsigned int raw)
+{
+    return (struct dp_src2_immediate) {
+        .rot  = select_bits(raw, 11, 8),
+        .imm8 = select_bits(raw,  7, 0)
+    };
+}
+
+struct dp_src2_reg decode_dp_src2_reg (unsigned int raw)
+{
+    return (struct dp_src2_reg) {
+        .shamt5       = select_bits(raw, 11, 7),
+        .sh           = select_bits(raw,  6, 5),
+        .is_reg_shift = select_bits(raw,  4, 4),
+        .rm           = select_bits(raw,  3, 0),
+    };
+}
+
 void add(struct state* state, struct dp_instr* inst)
 {
     int src2_value = 0 ;
-    union dp_src2 src2 = (union dp_src2) inst->src2;
     if (inst->i == 1) {
-        struct dp_src2_immediate imm = (struct dp_src2_immediate) src2;
-        src2_value = rotate_immediate(imm->rot, imm->imm8);
+        struct dp_src2_immediate imm = decode_dp_src2_immediate(inst->src2);
+        src2_value = rotate_immediate(imm.rot, imm.imm8);
     } else {
-        struct dp_src2_reg reg = src2.reg_shifted;
-        if (reg->is_reg_shift) {
+        struct dp_src2_reg reg = decode_dp_src2_reg(inst->src2);
+        if (reg.is_reg_shift) {
             fprintf(stderr, "Src2 register shifted is not supported yet.\n");
             exit(EXIT_FAILURE);
         } else {
-            if (reg->shamt5 != 0) {
+            if (reg.shamt5 != 0) {
                 fprintf(stderr, "Src2 shifts are not supported at this time. \n");
                 exit(EXIT_FAILURE);
             }
@@ -211,7 +222,7 @@ int main (int argc, char* argv[])
 
     struct state state = { };
 
-    init_state(&state, add, 1, 2, 3, 4);
+    init_state(&state, add_function, 1, 2, 3, 4);
     armemu(&state);
     // printf("r = %d\n", r);
 }
