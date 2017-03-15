@@ -3,6 +3,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define DEBUG 1
+#include "debug_utils.h"
+
 unsigned int add_function (unsigned int a, unsigned int b, unsigned int c, unsigned int d);
 
 #define NUM_REGS 16
@@ -159,10 +162,10 @@ void branch_and_exchange(struct state* state, struct dp_instr* inst)
 {
     unsigned int rn = select_bits(inst->src2, 3, 0);
     unsigned int rn_val = state->regs[rn];
-    printf("Current value of PC: 0x%02x\n", state->regs[PC]);
-    printf("Current value of LR: 0x%02x\n", state->regs[LR]);
+    debug("Current value of PC: 0x%02x\n", state->regs[PC]);
+    debug("Current value of LR: 0x%02x\n", state->regs[LR]);
     state->regs[PC] = rn_val;
-    printf("Update PC to 0x%02x\n", rn_val);
+    debug("Update PC to 0x%02x\n", rn_val);
 }
 
 void print_instr(struct dp_instr* i)
@@ -221,7 +224,7 @@ struct branch_link_instr decode_branch_link_instr (unsigned int raw)
 void armemu_one_branch(struct state* state, struct branch_link_instr* instr)
 {
     if (instr->link) {
-        printf("Is link instruction, LR = PC (%d) + 4 = %d\n", state->regs[PC], state->regs[PC]+4); 
+        debug("Is link instruction, LR = PC (%d) + 4 = %d\n", state->regs[PC], state->regs[PC]+4); 
         state->regs[LR] = state->regs[PC] + 4;
     }
 
@@ -250,7 +253,7 @@ void armemu_one(struct state* s)
             break;
         case 0x02:
             { // scope required due to declared variables
-                printf("Branch, and maybe link\n");
+                debug("Branch, and maybe link\n", NULL);
                 struct branch_link_instr branch_link_instr = decode_branch_link_instr(*pc_addr);
                 armemu_one_branch(s, &branch_link_instr);
                 break;
@@ -290,3 +293,4 @@ int main (int argc, char* argv[])
     armemu(&state);
     printf("r = %d\n", state.regs[0]);
 }
+
