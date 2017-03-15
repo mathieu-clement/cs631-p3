@@ -162,10 +162,10 @@ void branch_and_exchange(struct state* state, struct dp_instr* inst)
 {
     unsigned int rn = select_bits(inst->src2, 3, 0);
     unsigned int rn_val = state->regs[rn];
-    debug("Current value of PC: 0x%02x\n", state->regs[PC]);
-    debug("Current value of LR: 0x%02x\n", state->regs[LR]);
+    debug("Current value of PC: 0x%02x", state->regs[PC]);
+    debug("Current value of LR: 0x%02x", state->regs[LR]);
     state->regs[PC] = rn_val;
-    debug("Update PC to 0x%02x\n", rn_val);
+    debug("Update PC to 0x%02x", rn_val);
 }
 
 void print_instr(struct dp_instr* i)
@@ -224,7 +224,7 @@ struct branch_link_instr decode_branch_link_instr (unsigned int raw)
 void armemu_one_branch(struct state* state, struct branch_link_instr* instr)
 {
     if (instr->link) {
-        debug("Is link instruction, LR = PC (%d) + 4 = %d\n", state->regs[PC], state->regs[PC]+4); 
+        debug("Is link instruction, LR = PC (0x%02x) + 4 = 0x%02x", state->regs[PC], state->regs[PC]+4); 
         state->regs[LR] = state->regs[PC] + 4;
     }
 
@@ -244,6 +244,7 @@ void armemu_one_branch(struct state* state, struct branch_link_instr* instr)
 void armemu_one(struct state* s)
 {
     unsigned int* pc_addr = (unsigned int*) s->regs[PC];
+    debug("PC is at address 0x%02x", s->regs[PC]);
     struct dp_instr dp_instr = decode_dp_instr(*pc_addr);
     print_instr(&dp_instr);
 
@@ -253,9 +254,9 @@ void armemu_one(struct state* s)
             break;
         case 0x02:
             { // scope required due to declared variables
-                debug("Branch, and maybe link\n", NULL);
-                struct branch_link_instr branch_link_instr = decode_branch_link_instr(*pc_addr);
-                armemu_one_branch(s, &branch_link_instr);
+                debug("Branch, and maybe link", NULL);
+                struct branch_link_instr bl_instr = decode_branch_link_instr(*pc_addr);
+                armemu_one_branch(s, &bl_instr);
                 break;
             }
         default:
