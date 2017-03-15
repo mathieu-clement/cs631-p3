@@ -89,9 +89,12 @@ void init_state(struct state* s,
                 unsigned int r2,
                 unsigned int r3)
 {
-    printf("%d %d %d %d\n", r0, r1, r2, r3);
+    s->regs[0] = r0;
+    s->regs[1] = r1;
+    s->regs[2] = r2;
+    s->regs[3] = r3;
 
-    for (int i = 0 ; i < NUM_REGS ; ++i) {
+    for (int i = 4 ; i < NUM_REGS ; ++i) {
         s->regs[i] = 0;
     }
 
@@ -142,9 +145,11 @@ void add(struct state* state, struct dp_instr* inst)
                 fprintf(stderr, "Src2 shifts are not supported at this time. \n");
                 exit(EXIT_FAILURE);
             }
-            src2_value = (int) reg.rm;
+            printf("*** Register %d has value %d\n", reg.rm, state->regs[reg.rm]);
+            src2_value = (int) state->regs[reg.rm];
         }
     }
+    printf(" ---> r%d = r%d + %d\n", inst->rd, inst->rn, src2_value);
     state->regs[inst->rd] = (int) (state->regs[inst->rn]) + src2_value;
 }
 
@@ -222,7 +227,7 @@ int main (int argc, char* argv[])
 
     struct state state = { };
 
-    init_state(&state, add_function, 1, 2, 3, 4);
+    init_state(&state, add_function, 10, 11, 12, 13);
     armemu(&state);
-    // printf("r = %d\n", r);
+    printf("r = %d\n", state.regs[0]);
 }
