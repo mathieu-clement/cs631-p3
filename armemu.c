@@ -145,12 +145,19 @@ void add(struct state* state, struct dp_instr* inst)
                 fprintf(stderr, "Src2 shifts are not supported at this time. \n");
                 exit(EXIT_FAILURE);
             }
-            printf("*** Register %d has value %d\n", reg.rm, state->regs[reg.rm]);
             src2_value = (int) state->regs[reg.rm];
         }
     }
-    printf(" ---> r%d = r%d + %d\n", inst->rd, inst->rn, src2_value);
     state->regs[inst->rd] = (int) (state->regs[inst->rn]) + src2_value;
+}
+
+void branch_and_exchange(struct state* state, struct dp_instr* inst)
+{
+    unsigned int rn = select_bits(inst->src2, 3, 0);
+    unsigned int rn_val = state->regs[rn];
+    printf("Current value of LR: %d\n", state->regs[LR]);
+    state->regs[PC] = rn_val;
+    printf("Update PC to %d\n", rn_val);
 }
 
 void print_instr(struct dp_instr* i)
@@ -179,6 +186,9 @@ void armemu_one_dp(struct state* state, struct dp_instr* inst)
     switch (inst->cmd) {
         case 0x4:
             add(state, inst);
+            break;
+        case 0x9:
+            branch_and_exchange(state, inst);
             break;
         default:
             fprintf(stderr, "Unknown Data Processing instruction with cmd %02x.\n",
@@ -211,9 +221,9 @@ void armemu_one(struct state* s)
 void armemu(struct state* s)
 {
     int i = 0;
-//    while(s->regs[PC] != 0) {
-    for ( ; i < 4 ; ++i) {
-        printf("%d:\n", i); armemu_one(s); 
+    while(s->regs[PC] != 0) {
+        printf("Instruction #%d:\n", i); armemu_one(s); 
+        i++;
     }
 }
 
