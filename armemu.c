@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -129,7 +130,7 @@ struct dp_src2_reg decode_dp_src2_reg (unsigned int raw)
     };
 }
 
-void add(struct state* state, struct dp_instr* inst)
+void add_or_subtract(struct state* state, struct dp_instr* inst, bool is_add)
 {
     int src2_value = 0 ;
     if (inst->i == 1) {
@@ -148,6 +149,9 @@ void add(struct state* state, struct dp_instr* inst)
             src2_value = (int) state->regs[reg.rm];
         }
     }
+    if (!is_add) {
+        src2_value = -src2_value;
+    }
     state->regs[inst->rd] = (int) (state->regs[inst->rn]) + src2_value;
 }
 
@@ -155,9 +159,10 @@ void branch_and_exchange(struct state* state, struct dp_instr* inst)
 {
     unsigned int rn = select_bits(inst->src2, 3, 0);
     unsigned int rn_val = state->regs[rn];
-    printf("Current value of LR: %d\n", state->regs[LR]);
+    printf("Current value of PC: 0x%02x\n", state->regs[PC]);
+    printf("Current value of LR: 0x%02x\n", state->regs[LR]);
     state->regs[PC] = rn_val;
-    printf("Update PC to %d\n", rn_val);
+    printf("Update PC to 0x%02x\n", rn_val);
 }
 
 void print_instr(struct dp_instr* i)
@@ -184,8 +189,11 @@ void print_instr(struct dp_instr* i)
 void armemu_one_dp(struct state* state, struct dp_instr* inst)
 {
     switch (inst->cmd) {
+        case 0x2:
+            add_or_subtract(state, inst, false);
+            break;
         case 0x4:
-            add(state, inst);
+            add_or_subtract(state, inst, true);
             break;
         case 0x9:
             branch_and_exchange(state, inst);
@@ -195,6 +203,39 @@ void armemu_one_dp(struct state* state, struct dp_instr* inst)
                     inst->cmd);
     }
 
+}
+
+struct branch_link_instr {
+    unsigned int link   :  1 ;
+    unsigned int offset   : 24 ;
+};
+
+struct branch_link_instr decode_branch_link_instr (unsigned int raw)
+{
+    return (struct branch_link_instr) {
+        .link   = select_bits(raw, 24, 24),
+        .offset = select_bits(raw, 23, 0)
+    };
+}
+
+void armemu_one_branch(struct state* state, struct branch_link_instr* instr)
+{
+    if (instr->link) {
+        printf("Is link instruction, LR = PC (%d) + 4 = %d\n", state->regs[PC], state->regs[PC]+4); 
+        state->regs[LR] = state->regs[PC] + 4;
+    }
+
+    unsigned int raw_offset = instr->offset;
+    raw_offset <<= 2;
+    
+    // Sign extend offset
+    if (select_bits(raw_offset, 25, 25) == 1) {
+        raw_offset |= 0xFC000000;
+    }
+
+    signed int signed_offset = (signed int) raw_offset;
+
+    state->regs[PC] = state->regs[PC] + 8 + signed_offset; // 8 simulates prefetch
 }
 
 void armemu_one(struct state* s)
@@ -207,6 +248,13 @@ void armemu_one(struct state* s)
         case 0x00: // Data processing
             armemu_one_dp(s, &dp_instr);
             break;
+        case 0x02:
+            { // scope required due to declared variables
+                printf("Branch, and maybe link\n");
+                struct branch_link_instr branch_link_instr = decode_branch_link_instr(*pc_addr);
+                armemu_one_branch(s, &branch_link_instr);
+                break;
+            }
         default:
             fprintf(stderr, "Unknown instruction type (op) %02x.\n",
                     dp_instr.op);
@@ -221,10 +269,11 @@ void armemu_one(struct state* s)
 void armemu(struct state* s)
 {
     int i = 0;
-    while(s->regs[PC] != 0) {
+    while (s->regs[PC] != 0 && i < 15) {
         printf("Instruction #%d:\n", i); armemu_one(s); 
         i++;
     }
+    printf("NOTE: Emulator stops after 15 instructions. \n");
 }
 
 
