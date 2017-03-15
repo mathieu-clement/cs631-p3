@@ -155,6 +155,7 @@ void add_or_subtract(struct state* state, struct dp_instr* inst, bool is_add)
     if (!is_add) {
         src2_value = -src2_value;
     }
+    debug("Add %d to r%d", src2_value, inst->rn);
     state->regs[inst->rd] = (int) (state->regs[inst->rn]) + src2_value;
 }
 
@@ -239,6 +240,7 @@ void armemu_one_branch(struct state* state, struct branch_link_instr* instr)
     signed int signed_offset = (signed int) raw_offset;
 
     state->regs[PC] = state->regs[PC] + 8 + signed_offset; // 8 simulates prefetch
+    debug("Branch to 0x%02x", state->regs[PC]);
 }
 
 struct load_store_instr {
@@ -314,12 +316,16 @@ void armemu_one_load_store (struct state* s, struct load_store_instr* instr)
         if (instr->b == 1) {
             s->regs[rd] &= 0x000000FF;
         } // end if byte
+        debug("Load data (0x%02x) from address 0x%02x (incl. offset) to r%d",
+              s->regs[rd], (unsigned int) mem_addr, rd);
     } else {
         // STORE data from rd to mem_addr
         *mem_addr = s->regs[rd];
         if (instr->b == 1) {
             *mem_addr &= 0x000000FF;
         } // end if byte
+        debug("Store data (0x%02x) from r%d to address 0x%02x (incl. offset)",
+              s->regs[rd], rd, (unsigned int) mem_addr);
     } // end if load
 } // end armemu_one_load_store
 
@@ -328,7 +334,7 @@ void armemu_one (struct state* s)
     unsigned int* pc_addr = (unsigned int*) s->regs[PC];
     debug("PC is at address 0x%02x", s->regs[PC]);
     struct dp_instr dp_instr = decode_dp_instr(*pc_addr);
-    print_instr(&dp_instr);
+    //print_instr(&dp_instr);
 
     switch (dp_instr.op) {
         case 0x00: // Data processing
@@ -362,8 +368,8 @@ void armemu(struct state* s)
 {
     int i = 0;
     while (s->regs[PC] != 0) {
-        printf("Instruction #%d:\n", i); armemu_one(s); 
-        i++;
+        debug("Instruction #%d", i++); 
+        armemu_one(s); 
     }
     printf("NOTE: Emulator stopped after %d instructions. \n", i);
 }
