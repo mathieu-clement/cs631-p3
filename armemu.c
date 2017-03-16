@@ -7,7 +7,11 @@
 #define DEBUG 1
 #include "debug_utils.h"
 
+// Assembly function signature
+typedef unsigned int (*func)(unsigned int, unsigned int, unsigned int, unsigned int);
+
 unsigned int add_function (unsigned int a, unsigned int b, unsigned int c, unsigned int d);
+unsigned int sum_array(unsigned int a, unsigned int b, unsigned int c, unsigned int d);
 
 #define NUM_REGS 16
 #define SP 13
@@ -83,9 +87,6 @@ struct dp_instr decode_dp_instr (unsigned int raw)
         .src2   =     select_bits(raw, 11, 0) 
     };
 }
-
-// Assembly function signature
-typedef unsigned int (*func)(unsigned int, unsigned int, unsigned int, unsigned int);
 
 void init_state(struct state* s, 
                 func f, 
@@ -518,13 +519,6 @@ void armemu(struct state* s)
     debug("Reached function end. %d instructions executed.", i);
 }
 
-func find_func (char* name)
-{
-    if (strcmp(name, "add_function") == 0) return add_function;
-    
-    return NULL;
-}
-
 int main (int argc, char* argv[])
 {
     if (argc < 2) {
@@ -534,13 +528,15 @@ int main (int argc, char* argv[])
 
     struct state state = { };
 
-    func func = find_func(argv[1]);
-    if (!func) {
-        fprintf(stderr, "Function %s could not be found.\n", argv[1]);
+    if (strcmp(argv[1], "add_function") == 0) {
+        init_state(&state, add_function, 10, 11, 12, 13);
+    } else if (strcmp(argv[1], "sum_array") == 0) {
+        int array[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9 } ;
+        init_state(&state, sum_array, (unsigned int) array, 9, 0, 0);
+    } else {
+        fprintf(stderr, "Unknown function %s\n", argv[1]);
         exit(EXIT_FAILURE);
     }
-
-    init_state(&state, func, 10, 11, 12, 13);
     armemu(&state);
     printf("r = %d\n", state.regs[0]);
 }
