@@ -195,6 +195,27 @@ void print_instr(struct dp_instr* i)
            );
 }
 
+void mov(struct state* state, struct dp_instr* instr)
+{
+    // rd = src2
+    int value;
+    if (instr->i == 1) {
+        debug("Immediate value %d", instr->src2);
+        value = instr->src2;
+    } else {
+        unsigned int shift = select_bits(instr->src2, 11, 8);
+        unsigned int reg = select_bits(instr->src2, 7, 0);
+        value = state->regs[reg];
+        debug("Value (%d) from r%d shifted by %d", value, reg, shift);
+        if (shift != 0) {
+            value <<= shift;
+            debug("Shifted value: %d", value);
+        }
+    }
+
+    state->regs[instr->rd] = value;
+}
+
 void armemu_one_dp(struct state* state, struct dp_instr* inst)
 {
     switch (inst->cmd) {
@@ -207,9 +228,13 @@ void armemu_one_dp(struct state* state, struct dp_instr* inst)
         case 0x9:
             branch_and_exchange(state, inst);
             break;
+        case 0xd:
+            mov(state, inst);
+            break;
         default:
             fprintf(stderr, "Unknown Data Processing instruction with cmd %02x.\n",
                     inst->cmd);
+            exit(EXIT_FAILURE);
     }
 
 }
@@ -338,6 +363,62 @@ void armemu_one_load_store (struct state* s, struct load_store_instr* instr)
     } // end if load
 } // end armemu_one_load_store
 
+struct load_store_multiple_instr {
+    unsigned int cond :  4 ;
+    unsigned int      :  3 ;
+    unsigned int p    :  1 ;
+    unsigned int u    :  1 ;
+    unsigned int s    :  1 ;
+    unsigned int w    :  1 ;
+    unsigned int l    :  1 ;
+    unsigned int rn   :  4 ;
+    unsigned int regs : 16 ;
+};
+
+struct load_store_multiple_instr decode_load_store_multiple_instr (unsigned int raw)
+{
+    return (struct load_store_multiple_instr) {
+        .cond = select_bits(raw, 31, 28),
+        .p    = select_bits(raw, 24, 24),
+        .u    = select_bits(raw, 23, 23),
+        .s    = select_bits(raw, 22, 22),
+        .w    = select_bits(raw, 21, 21),
+        .l    = select_bits(raw, 20, 20),
+        .rn   = select_bits(raw, 19, 16),
+        .regs = select_bits(raw, 15,  0)
+    };
+}
+
+void armemu_one_load_store_multiple (struct state* s, struct load_store_multiple_instr* instr)
+{
+    if (instr->s == 1) {
+        fprintf(stderr, "PSR & force user bit in multiple load / store instruction is not supported\n");
+        exit(EXIT_FAILURE);
+    }
+                
+    unsigned int* addr = (unsigned int*) s->regs[instr->rn];
+    
+    if (instr->l == 0 && instr->p == 1) { // Push (stmfd, stmdb)
+        for (int i = 0 ; i < 17 ; i++) {
+            if ( ( instr->regs & (1 << i) ) >> i == 1) {
+                debug("Store r%d (value %d) to address 0x%02x at r%d", i, s->regs[i], (unsigned int) addr, instr->rn);
+                *addr = s->regs[i];
+                addr--;
+            }
+        } // end for
+    } else if (instr->l == 1 && instr->p == 0) { // Pop (ldmfd, ldmia)
+        for (int i = 16 ; i >= 0 ; i--) {
+            if ( ( instr->regs & (1 << i) ) >> i == 1) {
+                addr++; // First move SP (or whatever Rn is)
+                debug("Copy value %d from address 0x%02x (r%d) to r%d", *addr, (unsigned int) addr, instr->rn, i);
+                s->regs[i] = *addr;
+            }
+        } // end for
+    } // end if push or pop
+
+    s->regs[instr->rn] = (unsigned int) addr;
+} // end armemu_one_load_store_multiple
+
 void armemu_one (struct state* s)
 {
     unsigned int* pc_addr = (unsigned int*) s->regs[PC];
@@ -355,16 +436,24 @@ void armemu_one (struct state* s)
                 armemu_one_load_store(s, &instr);
                 break;
             }
-        case 0x02: // Branch and link
-            { // scope required due to declared variables
-                debug("Branch, and maybe link", NULL);
-                struct branch_link_instr bl_instr = decode_branch_link_instr(*pc_addr);
-                armemu_one_branch(s, &bl_instr);
+        case 0x02: // Branch and link or STM/LDM
+            { 
+                unsigned int code = select_bits(*pc_addr, 27, 25);
+                if (code == 0x5) { // Branch
+                    struct branch_link_instr bl_instr = decode_branch_link_instr(*pc_addr);
+                    armemu_one_branch(s, &bl_instr);
+                } else if (code == 0x4) { // STM/LDM
+                    struct load_store_multiple_instr lsm_instr = decode_load_store_multiple_instr(*pc_addr);
+                    armemu_one_load_store_multiple(s, &lsm_instr);
+                    break;
+                } else {
+                    fprintf(stderr, "Unknown instruction %02x \n", *pc_addr);
+                    exit(EXIT_FAILURE);
+                }
                 break;
             }
         default:
-            fprintf(stderr, "Unknown instruction type (op) %02x.\n",
-                    dp_instr.op);
+            fprintf(stderr, "Unknown instruction type (op) %02x.\n", dp_instr.op);
             exit(EXIT_FAILURE);
     }
 
@@ -378,10 +467,10 @@ void armemu(struct state* s)
 {
     int i = 0;
     while (s->regs[PC] != 0) {
-        debug("Instruction #%d", i++); 
+        debug("Instruction #%d", ++i); 
         armemu_one(s); 
     }
-    printf("NOTE: Emulator stopped after %d instructions. \n", i);
+    debug("Reached function end. %d instructions executed.", i);
 }
 
 func find_func (char* name)
