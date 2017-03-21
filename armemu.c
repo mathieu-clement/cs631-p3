@@ -23,8 +23,9 @@ void armemu_one (struct state* s)
     struct dp_instr dp_instr = decode_dp_instr(*pc_addr);
     
     const char* cond_str = condition_to_string(dp_instr.cond);
+    bool cond_true = condition_is_true(s, dp_instr.cond);
     
-    if (condition_is_true(s, dp_instr.cond)) {
+    if (cond_true) {
         if (dp_instr.cond != 14) debug("Condition %s is true", cond_str);
         switch (dp_instr.op) {
             case 0x00: // Data processing
@@ -61,8 +62,10 @@ void armemu_one (struct state* s)
     } // end if condition
 
     // Update PC
-    if (dp_instr.rn != PC) {
+    if (!cond_true || dp_instr.rn != PC) {
         s->regs[PC] = s->regs[PC] + 4;
+    } else {
+        debug("PC not incremented", NULL);
     }
 }
 

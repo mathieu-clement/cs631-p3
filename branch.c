@@ -28,6 +28,8 @@ void armemu_one_branch(struct state* state, struct branch_link_instr* instr)
     if (instr->link) {
         debug("Is link instruction, LR = PC (0x%02x) + 4 = 0x%02x", state->regs[PC], state->regs[PC]+4); 
         state->regs[LR] = state->regs[PC] + 4;
+    } else {
+        debug("NOT a link instruction, LR not updated", NULL);
     }
 
     unsigned int raw_offset = instr->offset;
