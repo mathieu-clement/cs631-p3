@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEBUG 1
 #include "debug_utils.h"
 
 #include "bits.h"
@@ -24,8 +23,6 @@ void armemu_one (struct state* s)
     struct dp_instr dp_instr = decode_dp_instr(*pc_addr);
     
     if (condition_is_true(s, dp_instr.cond)) {
-        debug("Condition %d is true", dp_instr.cond);
-
         switch (dp_instr.op) {
             case 0x00: // Data processing
                 armemu_one_dp(s, &dp_instr);

@@ -1,4 +1,4 @@
-CFLAGS=-g -O0 -W -Wall -Werror -std=c11
+CFLAGS=-g -O0 -W -Wall -Werror -std=c11 -DDEBUG=1
 LDFLAGS=
 DEPS=add_function.o sum_array.o state.o data_processing.o branch.o memory.o conditions.o bits.o
 OBJS=armemu.o $(DEPS)
