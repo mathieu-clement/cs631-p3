@@ -12,7 +12,6 @@
 #define COND_NE 1
 #define COND_LS 9
 #define COND_GE 10
-#define COND_LT 11
 #define COND_LE 13
 #define COND_AL 14
 
@@ -27,8 +26,6 @@ const char* condition_to_string(unsigned int cond)
             return "LS";
         case COND_GE:
             return "GE";
-        case COND_LT:
-            return "LT";
         case COND_LE:
             return "LE";
         case COND_AL:
@@ -46,15 +43,13 @@ bool condition_is_true (struct state* s, unsigned int cond)
 
     switch (cond) {
         case COND_EQ:
-            return z == 0;
-        case COND_NE:
             return z == 1;
+        case COND_NE:
+            return z == 0;
         case COND_LS:
             return c == 0 || z == 1;
         case COND_GE:
             return n == v;
-        case COND_LT:
-            return n != v;
         case COND_LE:
             return z == 1 || n != v;
         case COND_AL:
