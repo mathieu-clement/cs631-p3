@@ -16,15 +16,33 @@
 #define COND_LE 13
 #define COND_AL 14
 
+char* condition_to_str(unsigned int cond)
+{
+    switch(cond) {
+        case COND_EQ:
+            return "EQ";
+        case COND_NE:
+            return "NE";
+        case COND_LS:
+            return "LS";
+        case COND_GE:
+            return "GE";
+        case COND_LT:
+            return "LT";
+        case COND_LE:
+            return "LE";
+        case COND_AL:
+            return "AL";
+    }
+    return "??";
+}
+
 bool condition_is_true (struct state* s, unsigned int cond)
 {
-    // bit numbers from https://www.heyrick.co.uk/armwiki/The_Status_register
-    unsigned int cpsr = s->cpsr;
-    unsigned int n = select_bits(cpsr, 31, 31);
-    unsigned int z = select_bits(cpsr, 30, 30);
-    unsigned int c = select_bits(cpsr, 29, 29);
-    unsigned int v = select_bits(cpsr, 28, 28);
-    // unsigned int q = select_bits(cpsr, 27, 27);
+    unsigned int n = s->cpsr.n;
+    unsigned int z = s->cpsr.z; 
+    unsigned int c = s->cpsr.c; 
+    unsigned int v = s->cpsr.v; 
 
     switch (cond) {
         case COND_EQ:

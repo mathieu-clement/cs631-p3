@@ -23,6 +23,7 @@ void armemu_one (struct state* s)
     struct dp_instr dp_instr = decode_dp_instr(*pc_addr);
     
     if (condition_is_true(s, dp_instr.cond)) {
+        if (dp_instr.cond != 14) debug("Condition %s is true", condition_to_string(dp_instr.cond));
         switch (dp_instr.op) {
             case 0x00: // Data processing
                 armemu_one_dp(s, &dp_instr);
@@ -54,8 +55,8 @@ void armemu_one (struct state* s)
                 exit(EXIT_FAILURE);
         } // end switch
     } else {
-        debug("Condition %d is false", dp_instr.cond);
-    }
+        debug("Condition %s is false", condition_to_string(dp_instr.cond));
+    } // end if condition
 
     // Update PC
     if (dp_instr.rn != PC) {

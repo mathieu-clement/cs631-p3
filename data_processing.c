@@ -69,7 +69,7 @@ int rotate_immediate (int rot, int imm8)
     return (imm8 << rot)|(imm8 >> (32 - rot));
 }
 
-void add_or_subtract(struct state* state, struct dp_instr* inst, bool is_add)
+int get_operand2 (struct state* state, struct dp_instr* inst)
 {
     int src2_value = 0 ;
     if (inst->i == 1) {
@@ -88,6 +88,12 @@ void add_or_subtract(struct state* state, struct dp_instr* inst, bool is_add)
             src2_value = (int) state->regs[reg.rm];
         }
     }
+    return src2_value;
+}
+
+void add_or_subtract(struct state* state, struct dp_instr* inst, bool is_add)
+{
+    int src2_value = get_operand2(state, inst);
     if (!is_add) {
         src2_value = -src2_value;
     }
@@ -116,6 +122,23 @@ void mov(struct state* state, struct dp_instr* instr)
     state->regs[instr->rd] = value;
 }
 
+void cmp (struct state* state, struct dp_instr* inst)
+{
+    int op2 = get_operand2(state, inst);
+    int rn_val = state->regs[inst->rn];
+    int result = rn_val - op2;
+
+    if (inst->s != 1 || inst->rd == 15)
+        return; // see instruction set page 4-11
+
+    state->cpsr.n = result < 0;
+    state->cpsr.z = result == 0;
+
+    // For Carry, and oVerflow, promote to 64 bits and compare
+    long long result_64 = (long long) rn_val - (long long) op2;
+    state->cpsr.v = state->cpsr.c = (unsigned int) ( (long long) result != result_64 ) ;
+}
+
 void armemu_one_dp(struct state* state, struct dp_instr* inst)
 {
     switch (inst->cmd) {
@@ -128,14 +151,17 @@ void armemu_one_dp(struct state* state, struct dp_instr* inst)
         case 0x9:
             branch_and_exchange(state, inst);
             break;
+        case 0xa:
+            cmp(state, inst);
+            break;
         case 0xd:
             mov(state, inst);
             break;
         default:
             fprintf(stderr, "Unknown Data Processing instruction with cmd %02x.\n"
                             "Try: \n"
-                            "    objdump -S armemu --start-address 0x%02x\n",
-                    inst->cmd, state->regs[PC]);
+                            "    objdump -S armemu --start-address 0x%02x --stop-address 0x%02x | tail -1\n",
+                    inst->cmd, state->regs[PC], state->regs[PC]+4);
             exit(EXIT_FAILURE);
     }
 

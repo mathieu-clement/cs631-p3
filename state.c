@@ -18,7 +18,7 @@ void init_state(struct state* s,
         s->regs[i] = 0;
     }
 
-    s->cpsr = 0;
+    s->cpsr = (struct cpsr) { };
 
     s->regs[SP] = (unsigned int) &(s->stack[STACK_SIZE+1]);
     s->regs[PC] = (unsigned int) f;
