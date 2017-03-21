@@ -126,10 +126,13 @@ void cmp (struct state* state, struct dp_instr* inst)
 {
     int op2 = get_operand2(state, inst);
     int rn_val = state->regs[inst->rn];
+    debug("Comparing r%d (value %d) with %d", inst->rn, rn_val, op2);
     int result = rn_val - op2;
 
-    if (inst->s != 1 || inst->rd == 15)
+    if (inst->s != 1 || inst->rd == 15) {
+        debug("s flag not set or rd is 15", NULL);
         return; // see instruction set page 4-11
+    }
 
     state->cpsr.n = result < 0;
     state->cpsr.z = result == 0;
@@ -137,6 +140,8 @@ void cmp (struct state* state, struct dp_instr* inst)
     // For Carry, and oVerflow, promote to 64 bits and compare
     long long result_64 = (long long) rn_val - (long long) op2;
     state->cpsr.v = state->cpsr.c = (unsigned int) ( (long long) result != result_64 ) ;
+
+    debug("Set CPSR[n=%d, z=%d, v=c=%d]",  state->cpsr.n, state->cpsr.z, state->cpsr.v);
 }
 
 void armemu_one_dp(struct state* state, struct dp_instr* inst)

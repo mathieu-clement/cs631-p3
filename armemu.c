@@ -22,8 +22,10 @@ void armemu_one (struct state* s)
     debug("PC is at address 0x%02x", s->regs[PC]);
     struct dp_instr dp_instr = decode_dp_instr(*pc_addr);
     
+    const char* cond_str = condition_to_string(dp_instr.cond);
+    
     if (condition_is_true(s, dp_instr.cond)) {
-        if (dp_instr.cond != 14) debug("Condition %s is true", condition_to_string(dp_instr.cond));
+        if (dp_instr.cond != 14) debug("Condition %s is true", cond_str);
         switch (dp_instr.op) {
             case 0x00: // Data processing
                 armemu_one_dp(s, &dp_instr);
@@ -55,7 +57,7 @@ void armemu_one (struct state* s)
                 exit(EXIT_FAILURE);
         } // end switch
     } else {
-        debug("Condition %s is false", condition_to_string(dp_instr.cond));
+        debug("Condition %s is false", cond_str);
     } // end if condition
 
     // Update PC
