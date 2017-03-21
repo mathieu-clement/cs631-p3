@@ -17,33 +17,11 @@
 unsigned int add_function (unsigned int a, unsigned int b, unsigned int c, unsigned int d);
 unsigned int sum_array(unsigned int a, unsigned int b, unsigned int c, unsigned int d);
 
-void print_instr(struct dp_instr* i)
-{
-    printf("cond: %u\n"
-           "  op: %u\n"
-           "   I: %u\n"
-           " cmd: %u\n"
-           "   S: %u\n"
-           "  Rn: %u\n"
-           "  Rd: %u\n"
-           "Src2: %u\n",
-           i->cond,
-           i->op,
-           i->i,
-           i->cmd,
-           i->s,
-           i->rn,
-           i->rd,
-           i->src2
-           );
-}
-
 void armemu_one (struct state* s)
 {
     unsigned int* pc_addr = (unsigned int*) s->regs[PC];
     debug("PC is at address 0x%02x", s->regs[PC]);
     struct dp_instr dp_instr = decode_dp_instr(*pc_addr);
-    //print_instr(&dp_instr);
     
     if (condition_is_true(s, dp_instr.cond)) {
         debug("Condition %d is true", dp_instr.cond);
