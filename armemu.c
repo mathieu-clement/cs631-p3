@@ -233,8 +233,10 @@ void armemu_one_dp(struct state* state, struct dp_instr* inst)
             mov(state, inst);
             break;
         default:
-            fprintf(stderr, "Unknown Data Processing instruction with cmd %02x.\n",
-                    inst->cmd);
+            fprintf(stderr, "Unknown Data Processing instruction with cmd %02x.\n"
+                            "Try: \n"
+                            "    objdump -S armemu --start-address 0x%02x\n",
+                    inst->cmd, state->regs[PC]);
             exit(EXIT_FAILURE);
     }
 
