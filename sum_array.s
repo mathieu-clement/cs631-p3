@@ -10,7 +10,7 @@ sum_array:
     # r3 : i (for loop index) => int
     # r4 : value of array[r0]
     sub sp, sp, #8
-    push {r4, r5}
+    str r4, [sp] // preserve r4
     mov r2, $0 // sum = 0
     mov r3, $0 // i = 0
 
@@ -27,6 +27,6 @@ loop:
 
 end:
     mov r0, r2
-    pop {r4, r5}
+    ldr r4, [sp]   // restore r4
     add sp, sp, #8
     bx lr
