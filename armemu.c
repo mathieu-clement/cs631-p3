@@ -18,6 +18,7 @@ unsigned int sum_array(unsigned int a, unsigned int b, unsigned int c, unsigned 
 unsigned int fib_iter(unsigned int a, unsigned int b, unsigned int c, unsigned int d);
 unsigned int fib_rec(unsigned int a, unsigned int b, unsigned int c, unsigned int d);
 unsigned int find_max(unsigned int a, unsigned int b, unsigned int c, unsigned int d);
+unsigned int find_str(unsigned int a, unsigned int b, unsigned int c, unsigned int d);
 
 void armemu_one (struct state* s)
 {
@@ -102,6 +103,12 @@ int main (int argc, char* argv[])
     } else if (strcmp(argv[1], "find_max") == 0) {
         int array[] = { 1, 2, 3, 4, 32, 5, 6, 7, 8, 9 } ;
         init_state(&state, find_max, (unsigned int) array, 10, 0, 0);
+    } else if (strcmp(argv[1], "find_str") == 0) {
+        if (argc < 4) {
+            fprintf(stderr, "missing arguments\n");
+            exit(EXIT_FAILURE);
+        }
+        init_state(&state, find_str, (unsigned int) argv[2], (unsigned int) argv[3], 0, 0);
     } else if (strcmp(argv[1], "fib_iter") == 0) {
         if (argc < 3) {
             fprintf(stderr, "missing argument \n");

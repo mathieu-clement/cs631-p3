@@ -123,6 +123,17 @@ void mov(struct state* state, struct dp_instr* instr)
     state->regs[instr->rd] = value;
 }
 
+void mvn(struct state* state, struct dp_instr* instr)
+{
+    if (instr->i == 0) {
+        fprintf(stderr, "mvn (negative move) with register not supported.\n");
+        exit(EXIT_FAILURE);
+    }
+    signed int value = - (instr->src2);
+    debug("Set r%d = %d", instr->rd, value);
+    state->regs[instr->rd] = value;
+}
+
 void cmp (struct state* state, struct dp_instr* inst)
 {
     int op2 = get_operand2(state, inst);
@@ -177,6 +188,9 @@ void armemu_one_dp(struct state* state, struct dp_instr* inst)
             break;
         case 0xd:
             mov(state, inst);
+            break;
+        case 0xf:
+            mvn(state, inst);
             break;
         default:
             fprintf(stderr, "Unknown Data Processing instruction with cmd %02x.\n"

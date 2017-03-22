@@ -26,7 +26,7 @@ struct load_store_instr decode_load_store_instr (unsigned int raw)
 
 void armemu_one_load_store (struct state* s, struct load_store_instr* instr)
 {
-    unsigned int* mem_addr = (unsigned int*) s->regs[instr->rn];
+    char* mem_addr = (char*) s->regs[instr->rn];
     debug("Address before offset: 0x%02x", (unsigned int) mem_addr);
 
     unsigned int offset = 0;
@@ -68,27 +68,33 @@ void armemu_one_load_store (struct state* s, struct load_store_instr* instr)
     } // end if immediate
 
     if (instr->u == 0) {
+        debug("Offset must be negated", NULL);
         offset = -offset;
     }
 
-    mem_addr += (offset/4); // mem_addr++ in C would cause an increase by size_t
+    mem_addr += offset; // mem_addr++ in C would cause an increase by size_t
     debug("Address after offset:  0x%02x", (unsigned int) mem_addr);
 
     unsigned int rd = instr->rd;
 
     if  (instr->l == 1) {
         // LOAD data from mem_addr to rd
-        s->regs[rd] = *mem_addr;
         if (instr->b == 1) {
+            s->regs[rd] = *mem_addr;
             s->regs[rd] &= 0x000000FF;
+        } else {
+            s->regs[rd] = *((unsigned int*) mem_addr);
         } // end if byte
         debug("Load data (0x%02x) from address 0x%02x (incl. offset) to r%d",
               s->regs[rd], (unsigned int) mem_addr, rd);
     } else {
         // STORE data from rd to mem_addr
-        *mem_addr = s->regs[rd];
         if (instr->b == 1) {
+            *mem_addr = s->regs[rd];
             *mem_addr &= 0x000000FF;
+        } else {
+            unsigned int* word_mem_addr = (unsigned int*) mem_addr;
+            *word_mem_addr = s->regs[rd];
         } // end if byte
         debug("Store data (0x%02x) from r%d to address 0x%02x (incl. offset)",
               s->regs[rd], rd, (unsigned int) mem_addr);
