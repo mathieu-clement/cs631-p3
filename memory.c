@@ -42,25 +42,35 @@ void armemu_one_load_store (struct state* s, struct load_store_instr* instr)
 
     if (instr->i == 0) {
         // Immediate offset
-        if (instr->u == 0) { // offset not Up => subtract offset from rd
-            offset = - (instr->offset);
-        } else {
-            offset = + (instr->offset);
-        } // end if offset up
         debug("Immediate offset: 0x%02x (up: %d)", instr->offset, instr->u);
     } else {
         // Register offset
         unsigned int rm = select_bits(instr->offset, 3, 0);
         unsigned int rm_val = s->regs[rm];
-        unsigned int shift = select_bits(instr->offset, 11, 4);
-        debug("Offset %d shifted by %d from register r%d", rm_val, shift, rm);
-        if (shift != 0) {
-            rm_val <<= shift;
+        if (select_bits(instr->offset, 0, 0) == 1) {
+            fprintf(stderr, "Shift by a register not supported (ref. 4.5.2)\n");
+            exit(EXIT_FAILURE);
+        }
+        unsigned int shift_type = select_bits(instr->offset, 6, 5);
+        if (shift_type != 0x0) {
+            fprintf(stderr, "Only LSL is supported at this time\n");
+            exit(EXIT_FAILURE);
+        }
+        unsigned int shift_amount = select_bits(instr->offset, 11, 7);
+        debug("Offset %d shifted by %d from register r%d", rm_val, shift_amount, rm);
+        if (shift_amount != 0) {
+            rm_val <<= shift_amount;
         }
         offset = rm_val;
     } // end if immediate
 
+    if (instr->u == 0) {
+        offset = -offset;
+    }
+
     mem_addr += offset;
+
+    debug("Address: 0x%02x", (unsigned int) mem_addr);
 
     unsigned int rd = instr->rd;
 

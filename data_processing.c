@@ -41,7 +41,7 @@ struct dp_instr decode_dp_instr (unsigned int raw)
         .s      =     select_bits(raw, 20, 20) ,
         .rn     =     select_bits(raw, 19, 16) ,
         .rd     =     select_bits(raw, 15, 12) ,
-        .src2   =     select_bits(raw, 11, 0) 
+        .src2   =     select_bits(raw, 11, 0)  ,
     };
 }
 
@@ -119,6 +119,7 @@ void mov(struct state* state, struct dp_instr* instr)
         }
     }
 
+    debug("Set r%d = %d", instr->rd, value);
     state->regs[instr->rd] = value;
 }
 
@@ -144,9 +145,24 @@ void cmp (struct state* state, struct dp_instr* inst)
     debug("Set CPSR[n=%d, z=%d, v=c=%d]",  state->cpsr.n, state->cpsr.z, state->cpsr.v);
 }
 
+void multiply (struct state* s, struct dp_instr* inst)
+{
+    // Supports only A = B * C
+
+    unsigned int rs = select_bits(inst->src2, 11, 8);
+    unsigned int rm = select_bits(inst->src2, 3, 0);
+    int result = s->regs[rm] * s->regs[rs];
+    debug("Multiply %d from r%d with %d from r%d and store result %d to r%d",
+           s->regs[rm], rm, s->regs[rs], rs, result, inst->rd);
+    s->regs[inst->rd] = result;
+}
+
 void armemu_one_dp(struct state* state, struct dp_instr* inst)
 {
     switch (inst->cmd) {
+        case 0x0:
+            multiply(state, inst);
+            break;
         case 0x2:
             add_or_subtract(state, inst, false);
             break;

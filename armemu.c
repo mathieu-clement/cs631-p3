@@ -15,6 +15,7 @@
 
 unsigned int add_function (unsigned int a, unsigned int b, unsigned int c, unsigned int d);
 unsigned int sum_array(unsigned int a, unsigned int b, unsigned int c, unsigned int d);
+unsigned int fib_iter(unsigned int a, unsigned int b, unsigned int c, unsigned int d);
 
 void armemu_one (struct state* s)
 {
@@ -93,6 +94,8 @@ int main (int argc, char* argv[])
     } else if (strcmp(argv[1], "sum_array") == 0) {
         int array[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9 } ;
         init_state(&state, sum_array, (unsigned int) array, 9, 0, 0);
+    } else if (strcmp(argv[1], "fib_iter") == 0) {
+        init_state(&state, fib_iter, 3, 0, 0, 0);
     } else {
         fprintf(stderr, "Unknown function %s\n", argv[1]);
         exit(EXIT_FAILURE);
