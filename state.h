@@ -1,6 +1,8 @@
 #ifndef STATE_H
 #define STATE_H
 
+#include "analysis.h"
+
 #define NUM_REGS 16
 #define SP 13
 #define LR 14
@@ -30,6 +32,7 @@ struct state {
     unsigned int regs[NUM_REGS];
     struct cpsr cpsr;
     unsigned int stack[STACK_SIZE];
+    struct analysis analysis;
 };
 
 // Assembly function signature
