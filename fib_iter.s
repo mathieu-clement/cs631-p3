@@ -30,7 +30,7 @@ fib_iter:
     str r2, [sp, #4]
 
     # array[2] = 2
-    mov r2, #2
+    mov r2, #1
     str r2, [sp, #8]
 
     # array[3 ... n] = array[i-1] + array[i-2]
