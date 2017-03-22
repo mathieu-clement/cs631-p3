@@ -97,7 +97,7 @@ void add_or_subtract(struct state* state, struct dp_instr* inst, bool is_add)
     if (!is_add) {
         src2_value = -src2_value;
     }
-    debug("Add %d to r%d", src2_value, inst->rn);
+    debug("Add/Subtract: r%d = r%d (value %d) + %d", inst->rd, inst->rn, (int) (state->regs[inst->rn]), src2_value);
     state->regs[inst->rd] = (int) (state->regs[inst->rn]) + src2_value;
 }
 
@@ -153,8 +153,8 @@ void multiply (struct state* s, struct dp_instr* inst)
     unsigned int rm = select_bits(inst->src2, 3, 0);
     int result = s->regs[rm] * s->regs[rs];
     debug("Multiply %d from r%d with %d from r%d and store result %d to r%d",
-           s->regs[rm], rm, s->regs[rs], rs, result, inst->rd);
-    s->regs[inst->rd] = result;
+           s->regs[rm], rm, s->regs[rs], rs, result, inst->rn);
+    s->regs[inst->rn] = result;
 }
 
 void armemu_one_dp(struct state* state, struct dp_instr* inst)

@@ -27,6 +27,8 @@ struct load_store_instr decode_load_store_instr (unsigned int raw)
 void armemu_one_load_store (struct state* s, struct load_store_instr* instr)
 {
     unsigned int* mem_addr = (unsigned int*) s->regs[instr->rn];
+    debug("Address before offset: 0x%02x", (unsigned int) mem_addr);
+
     unsigned int offset = 0;
 
     debug("rn: r%d, rd: r%d, raw offset value: 0x%02x", instr->rn, instr->rd, instr->offset);
@@ -43,11 +45,12 @@ void armemu_one_load_store (struct state* s, struct load_store_instr* instr)
     if (instr->i == 0) {
         // Immediate offset
         debug("Immediate offset: 0x%02x (up: %d)", instr->offset, instr->u);
+        offset = instr->offset;
     } else {
         // Register offset
         unsigned int rm = select_bits(instr->offset, 3, 0);
         unsigned int rm_val = s->regs[rm];
-        if (select_bits(instr->offset, 0, 0) == 1) {
+        if (select_bits(instr->offset, 4, 4) == 1) {
             fprintf(stderr, "Shift by a register not supported (ref. 4.5.2)\n");
             exit(EXIT_FAILURE);
         }
@@ -68,9 +71,8 @@ void armemu_one_load_store (struct state* s, struct load_store_instr* instr)
         offset = -offset;
     }
 
-    mem_addr += offset;
-
-    debug("Address: 0x%02x", (unsigned int) mem_addr);
+    mem_addr += (offset/4); // mem_addr++ in C would cause an increase by size_t
+    debug("Address after offset:  0x%02x", (unsigned int) mem_addr);
 
     unsigned int rd = instr->rd;
 

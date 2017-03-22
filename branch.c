@@ -15,6 +15,7 @@ struct branch_link_instr decode_branch_link_instr (unsigned int raw)
 
 void branch_and_exchange(struct state* state, struct dp_instr* inst)
 {
+    debug("Branch and exchange", NULL);
     unsigned int rn = select_bits(inst->src2, 3, 0);
     unsigned int rn_val = state->regs[rn];
     debug("Current value of PC: 0x%02x", state->regs[PC]);
@@ -25,6 +26,7 @@ void branch_and_exchange(struct state* state, struct dp_instr* inst)
 
 void armemu_one_branch(struct state* state, struct branch_link_instr* instr)
 {
+    debug("Branch (and link)", NULL);
     if (instr->link) {
         debug("Is link instruction, LR = PC (0x%02x) + 4 = 0x%02x", state->regs[PC], state->regs[PC]+4); 
         state->regs[LR] = state->regs[PC] + 4;

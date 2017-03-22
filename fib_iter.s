@@ -11,6 +11,10 @@ fib_iter:
     cmp r0, #0
     bxeq lr
 
+    # Handle special case of n == 1
+    cmp r0, #1
+    bxeq lr
+
     # Create an array of n + 1 elements on the stack
     add r1,  r0, #1     /* r1 = n + 1 */
     mov r3, #4
@@ -25,10 +29,14 @@ fib_iter:
     mov r2, #1
     str r2, [sp, #4]
 
-    # array[2 ... n] = array[i-1] + array[i-2]
+    # array[2] = 2
+    mov r2, #2
+    str r2, [sp, #8]
+
+    # array[3 ... n] = array[i-1] + array[i-2]
 
     # r3 : i => int
-    mov r3, #1 /* starts at 1, will be incremented to 2 immediately */
+    mov r3, #2 /* starts at 1, will be incremented to 2 immediately */
 
     # r2 : i-1 or i-2
     # r4 : array[i-1] 

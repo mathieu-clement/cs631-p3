@@ -25,6 +25,8 @@ void armemu_one (struct state* s)
     
     const char* cond_str = condition_to_string(dp_instr.cond);
     bool cond_true = condition_is_true(s, dp_instr.cond);
+
+    bool is_branch = false;
     
     if (cond_true) {
         if (dp_instr.cond != 14) debug("Condition %s is true", cond_str);
@@ -42,6 +44,7 @@ void armemu_one (struct state* s)
                 { 
                     unsigned int code = select_bits(*pc_addr, 27, 25);
                     if (code == 0x5) { // Branch
+                        is_branch = true;
                         struct branch_link_instr bl_instr = decode_branch_link_instr(*pc_addr);
                         armemu_one_branch(s, &bl_instr);
                     } else if (code == 0x4) { // STM/LDM
@@ -63,7 +66,7 @@ void armemu_one (struct state* s)
     } // end if condition
 
     // Update PC
-    if (!cond_true || dp_instr.rn != PC) {
+    if (!is_branch && (!cond_true || dp_instr.rn != PC)) {
         s->regs[PC] = s->regs[PC] + 4;
     } else {
         debug("PC not incremented", NULL);
@@ -95,7 +98,11 @@ int main (int argc, char* argv[])
         int array[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9 } ;
         init_state(&state, sum_array, (unsigned int) array, 9, 0, 0);
     } else if (strcmp(argv[1], "fib_iter") == 0) {
-        init_state(&state, fib_iter, 3, 0, 0, 0);
+        if (argc < 3) {
+            fprintf(stderr, "missing argument \n");
+            exit(EXIT_FAILURE);
+        }
+        init_state(&state, fib_iter, atoi(argv[2]), 0, 0, 0);
     } else {
         fprintf(stderr, "Unknown function %s\n", argv[1]);
         exit(EXIT_FAILURE);
