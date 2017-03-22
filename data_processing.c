@@ -129,7 +129,8 @@ void mvn(struct state* state, struct dp_instr* instr)
         fprintf(stderr, "mvn (negative move) with register not supported.\n");
         exit(EXIT_FAILURE);
     }
-    signed int value = - (instr->src2);
+    debug("src2(0x%02x) XOR 0xFFFFFFFF", instr->src2);
+    signed int value = instr->src2 ^ 0xFFFFFFFF;
     debug("Set r%d = %d", instr->rd, value);
     state->regs[instr->rd] = value;
 }

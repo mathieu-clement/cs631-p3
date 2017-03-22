@@ -61,7 +61,7 @@ try_expanding:
 
 end_try_next_start:
     cmp r2, #0
-    beq end
+    beq end 
     addne  r0, #1
     bne try_next_start
 
