@@ -47,8 +47,20 @@ void armemu_one (struct state* s)
     switch (dp_instr.op) {
         case OP_DATA_PROCESSING:
             {
-                s->analysis.dp_instructions++;
-                if (cond_true) armemu_one_dp(s, &dp_instr);
+                if (dp_instr.cmd == DP_CMD_BX) {
+                    s->analysis.branches++;
+                    if (cond_true) {
+                        s->analysis.branches_taken++;
+                    } else {
+                        s->analysis.branches_not_taken++;
+                    }
+                } else {
+                    s->analysis.dp_instructions++;
+                }
+
+                if (cond_true) {
+                    armemu_one_dp(s, &dp_instr);
+                }
                 break;
             }
         case OP_SINGLE_DATA_TRANSFER:
@@ -72,6 +84,7 @@ void armemu_one (struct state* s)
                         s->analysis.branches_not_taken++;
                     }
                 } else if (code == CODE_STM_LDM) { // STM/LDM
+                    s->analysis.memory_instructions++;
                     if (cond_true) {
                         struct load_store_multiple_instr lsm_instr = decode_load_store_multiple_instr(*pc_addr);
                         armemu_one_load_store_multiple(s, &lsm_instr);

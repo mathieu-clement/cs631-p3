@@ -181,7 +181,7 @@ void armemu_one_dp(struct state* state, struct dp_instr* inst)
         case 0x4:
             add_or_subtract(state, inst, true);
             break;
-        case 0x9:
+        case DP_CMD_BX:
             branch_and_exchange(state, inst);
             break;
         case 0xa:

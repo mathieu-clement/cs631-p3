@@ -5,6 +5,9 @@
 
 #include "state.h"
 
+// Data processing command for branch and exchange
+#define DP_CMD_BX 0x9
+
 // Data processing instruction
 // DDCA, page 330
 // Due to endianness, wasn't able to use the bitfield directly
