@@ -38,6 +38,8 @@ void armemu_one_branch(struct state* state, struct branch_link_instr* instr)
     raw_offset <<= 2;
     
     // Sign extend offset
+    // Because integers are 32 bit, and we shifted a 24-bit number by 2
+    // there are 6 bits that must be set to 1. (32 - 24 - 2 = 6)
     if (select_bits(raw_offset, 25, 25) == 1) {
         raw_offset |= 0xFC000000;
     }

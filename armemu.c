@@ -13,6 +13,12 @@
 #include "memory.h"
 #include "state.h"
 
+#define OP_DATA_PROCESSING 0
+#define OP_SINGLE_DATA_TRANSFER 1
+#define OP_BL_OR_MULTIPLE_DATA_TRANSFER 2
+#define CODE_BRANCH 5
+#define CODE_STM_LDM 4
+
 unsigned int add_function (unsigned int a, unsigned int b, unsigned int c, unsigned int d);
 unsigned int sum_array(unsigned int a, unsigned int b, unsigned int c, unsigned int d);
 unsigned int fib_iter(unsigned int a, unsigned int b, unsigned int c, unsigned int d);
@@ -24,49 +30,65 @@ void armemu_one (struct state* s)
 {
     unsigned int* pc_addr = (unsigned int*) s->regs[PC];
     debug("PC is at address 0x%02x", s->regs[PC]);
+
+    // All instructions are first decoded as data processing instructions
+    // due to the presence of the condition and op code fields.
     struct dp_instr dp_instr = decode_dp_instr(*pc_addr);
     
+    unsigned int code = select_bits(*pc_addr, 27, 25);
+
     const char* cond_str = condition_to_string(dp_instr.cond);
     bool cond_true = condition_is_true(s, dp_instr.cond);
 
     bool is_branch = false;
     
-    if (cond_true) {
-        if (dp_instr.cond != 14) debug("Condition %s is true", cond_str);
-        switch (dp_instr.op) {
-            case 0x00: // Data processing
-                armemu_one_dp(s, &dp_instr);
+    if (dp_instr.cond != COND_AL && cond_true) debug("Condition %s is true", cond_str);
+
+    switch (dp_instr.op) {
+        case OP_DATA_PROCESSING:
+            {
+                s->analysis.dp_instructions++;
+                if (cond_true) armemu_one_dp(s, &dp_instr);
                 break;
-            case 0x01: // Data transfer (LDR, STR)
-                {
+            }
+        case OP_SINGLE_DATA_TRANSFER:
+            {
+                if (cond_true) {
                     struct load_store_instr instr = decode_load_store_instr(*pc_addr);
                     armemu_one_load_store(s, &instr);
-                    break;
                 }
-            case 0x02: // Branch and link or STM/LDM
-                { 
-                    unsigned int code = select_bits(*pc_addr, 27, 25);
-                    if (code == 0x5) { // Branch
+                break;
+            }
+        case OP_BL_OR_MULTIPLE_DATA_TRANSFER:
+            { 
+                if (code == CODE_BRANCH) { // Branch
+                    s->analysis.branches++;
+                    if (cond_true) {
                         is_branch = true;
+                        s->analysis.branches_taken++;
                         struct branch_link_instr bl_instr = decode_branch_link_instr(*pc_addr);
                         armemu_one_branch(s, &bl_instr);
-                    } else if (code == 0x4) { // STM/LDM
+                    } else {
+                        s->analysis.branches_not_taken++;
+                    }
+                } else if (code == CODE_STM_LDM) { // STM/LDM
+                    if (cond_true) {
                         struct load_store_multiple_instr lsm_instr = decode_load_store_multiple_instr(*pc_addr);
                         armemu_one_load_store_multiple(s, &lsm_instr);
-                        break;
-                    } else {
-                        fprintf(stderr, "Unknown instruction %02x \n", *pc_addr);
-                        exit(EXIT_FAILURE);
                     }
                     break;
+                } else {
+                    fprintf(stderr, "Unknown instruction %02x \n", *pc_addr);
+                    exit(EXIT_FAILURE);
                 }
-            default:
-                fprintf(stderr, "Unknown instruction type (op) %02x.\n", dp_instr.op);
-                exit(EXIT_FAILURE);
-        } // end switch
-    } else {
-        debug("Condition %s is false", cond_str);
-    } // end if condition
+                break;
+            }
+        default:
+            fprintf(stderr, "Unknown instruction type (op) %02x.\n", dp_instr.op);
+            exit(EXIT_FAILURE);
+    } // end switch
+
+    if (!cond_true) debug("Condition %s is false", cond_str);
 
     // Update PC
     if (!is_branch && (!cond_true || dp_instr.rn != PC)) {
@@ -78,12 +100,11 @@ void armemu_one (struct state* s)
 
 void armemu(struct state* s)
 {
-    int i = 0;
     while (s->regs[PC] != 0) {
-        debug("Instruction #%d", ++i); 
+        debug("Instruction #%d", ++s->analysis.instructions); 
         armemu_one(s); 
     }
-    debug("Reached function end. %d instructions executed.", i);
+    debug("Reached function end. %d instructions executed.", s->analysis.instructions);
 }
 
 int main (int argc, char* argv[])
@@ -125,7 +146,10 @@ int main (int argc, char* argv[])
         fprintf(stderr, "Unknown function %s\n", argv[1]);
         exit(EXIT_FAILURE);
     }
+
     armemu(&state);
+
+    print_analysis(state.analysis);
     printf("r = %d\n", state.regs[0]);
 }
 

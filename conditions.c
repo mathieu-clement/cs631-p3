@@ -8,12 +8,12 @@
 
 #include "conditions.h"
 
+// exported conditions in conditions.h
 #define COND_EQ 0
 #define COND_NE 1
 #define COND_LS 9
 #define COND_GE 10
 #define COND_LE 13
-#define COND_AL 14
 
 const char* condition_to_string(unsigned int cond)
 {

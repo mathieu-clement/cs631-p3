@@ -24,6 +24,8 @@ void init_state(struct state* s,
     s->regs[PC] = (unsigned int) f;
     s->regs[LR] = 0;
 
+    s->analysis = (struct analysis) { };
+
     debug("SP = 0x%02x", s->regs[SP]);
     debug("PC = 0x%02x", s->regs[PC]);
     debug("LR = 0x%02x", s->regs[LR]);
