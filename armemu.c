@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/times.h>
 
 #include "debug_utils.h"
 
@@ -19,12 +20,14 @@
 #define CODE_BRANCH 5
 #define CODE_STM_LDM 4
 
-unsigned int add_function (unsigned int a, unsigned int b, unsigned int c, unsigned int d);
-unsigned int sum_array (unsigned int a, unsigned int b, unsigned int c, unsigned int d);
-unsigned int fib_iter (unsigned int a, unsigned int b, unsigned int c, unsigned int d);
-unsigned int fib_rec (unsigned int a, unsigned int b, unsigned int c, unsigned int d);
-unsigned int find_max (unsigned int a, unsigned int b, unsigned int c, unsigned int d);
-unsigned int find_str (unsigned int a, unsigned int b, unsigned int c, unsigned int d);
+#define FUNC_DEF(name) unsigned int name (unsigned int a, unsigned int b, unsigned int c, unsigned int d)
+
+FUNC_DEF(add_function);
+FUNC_DEF(sum_array);
+FUNC_DEF(fib_iter);
+FUNC_DEF(fib_rec);
+FUNC_DEF(find_max);
+FUNC_DEF(find_str);
 
 void armemu_one (struct state* s)
 {
