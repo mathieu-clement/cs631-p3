@@ -121,6 +121,36 @@ void armemu (struct state* s)
     debug("Reached function end. %d instructions executed.", s->analysis.instructions);
 }
 
+void invoke (
+        func func, 
+        unsigned int a, 
+        unsigned int b, 
+        unsigned int c,
+        unsigned int d
+        )
+{
+    struct state state;
+
+    unsigned int native_result = func(a, b, c, d);
+    printf("native r = %d\n", native_result);
+
+    init_state(&state, func, a, b, c, d);
+    armemu(&state);
+
+    print_analysis(state.analysis);
+    printf("r = %d\n", state.regs[0]);
+}
+
+void check_num_args (int expected, int actual)
+{
+    actual -= 2; // 0 is program name, 1 is function name
+    if (actual != expected) {
+        fprintf(stderr, "missing arguments. %d expected, found %d, including program name.\n",
+                expected, actual);
+        exit(EXIT_FAILURE);
+    }
+}
+
 int main (int argc, char* argv[])
 {
     if (argc < 2) {
@@ -128,42 +158,26 @@ int main (int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
 
-    struct state state;
-
     if (strcmp(argv[1], "add_function") == 0) {
-        init_state(&state, add_function, 10, 11, 12, 13);
+        invoke(add_function, 10, 11, 12, 13);
     } else if (strcmp(argv[1], "sum_array") == 0) {
         int array[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9 } ;
-        init_state(&state, sum_array, (unsigned int) array, 9, 0, 0);
+        invoke(sum_array, (unsigned int) array, 9, 0, 0);
     } else if (strcmp(argv[1], "find_max") == 0) {
         int array[] = { 1, 2, 3, 4, 32, 5, 6, 7, 8, 9 } ;
-        init_state(&state, find_max, (unsigned int) array, 10, 0, 0);
+        invoke(find_max, (unsigned int) array, 10, 0, 0);
     } else if (strcmp(argv[1], "find_str") == 0) {
-        if (argc < 4) {
-            fprintf(stderr, "missing arguments\n");
-            exit(EXIT_FAILURE);
-        }
-        init_state(&state, find_str, (unsigned int) argv[2], (unsigned int) argv[3], 0, 0);
+        check_num_args(2, argc);
+        invoke(find_str, (unsigned int) argv[2], (unsigned int) argv[3], 0, 0);
     } else if (strcmp(argv[1], "fib_iter") == 0) {
-        if (argc < 3) {
-            fprintf(stderr, "missing argument \n");
-            exit(EXIT_FAILURE);
-        }
-        init_state(&state, fib_iter, atoi(argv[2]), 0, 0, 0);
+        check_num_args(1, argc);
+        invoke(fib_iter, atoi(argv[2]), 0, 0, 0);
     } else if (strcmp(argv[1], "fib_rec") == 0) {
-        if (argc < 3) {
-            fprintf(stderr, "missing argument \n");
-            exit(EXIT_FAILURE);
-        }
-        init_state(&state, fib_rec, atoi(argv[2]), 0, 0, 0);
+        check_num_args(1, argc);
+        invoke(fib_rec, atoi(argv[2]), 0, 0, 0);
     } else {
         fprintf(stderr, "Unknown function %s\n", argv[1]);
         exit(EXIT_FAILURE);
     }
-
-    armemu(&state);
-
-    print_analysis(state.analysis);
-    printf("r = %d\n", state.regs[0]);
 }
 
