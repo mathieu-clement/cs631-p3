@@ -151,6 +151,11 @@ void check_num_args (int expected, int actual)
     }
 }
 
+bool is_function_invocation(char* func_name, char* argv[])
+{
+    return strcmp(argv[1], func_name) == 0;
+}
+
 int main (int argc, char* argv[])
 {
     if (argc < 2) {
@@ -158,21 +163,21 @@ int main (int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
 
-    if (strcmp(argv[1], "add_function") == 0) {
+    if (is_function_invocation("add_function", argv)) {
         invoke(add_function, 10, 11, 12, 13);
-    } else if (strcmp(argv[1], "sum_array") == 0) {
+    } else if (is_function_invocation("sum_array", argv)) {
         int array[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9 } ;
         invoke(sum_array, (unsigned int) array, 9, 0, 0);
-    } else if (strcmp(argv[1], "find_max") == 0) {
+    } else if (is_function_invocation("find_max", argv)) {
         int array[] = { 1, 2, 3, 4, 32, 5, 6, 7, 8, 9 } ;
         invoke(find_max, (unsigned int) array, 10, 0, 0);
-    } else if (strcmp(argv[1], "find_str") == 0) {
+    } else if (is_function_invocation("find_str", argv)) {
         check_num_args(2, argc);
         invoke(find_str, (unsigned int) argv[2], (unsigned int) argv[3], 0, 0);
-    } else if (strcmp(argv[1], "fib_iter") == 0) {
+    } else if (is_function_invocation("fib_iter", argv)) {
         check_num_args(1, argc);
         invoke(fib_iter, atoi(argv[2]), 0, 0, 0);
-    } else if (strcmp(argv[1], "fib_rec") == 0) {
+    } else if (is_function_invocation("fib_rec", argv)) {
         check_num_args(1, argc);
         invoke(fib_rec, atoi(argv[2]), 0, 0, 0);
     } else {
