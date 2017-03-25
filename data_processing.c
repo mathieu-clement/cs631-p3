@@ -86,6 +86,7 @@ int get_operand2 (struct state* state, struct dp_instr* inst)
                 exit(EXIT_FAILURE);
             }
             src2_value = (int) state->regs[reg.rm];
+            state->analysis.register_reads[reg.rm]++;
         }
     }
     return src2_value;
@@ -99,6 +100,8 @@ void add_or_subtract (struct state* state, struct dp_instr* inst, bool is_add)
     }
     debug("Add/Subtract: r%d = r%d (value %d) + %d", inst->rd, inst->rn, (int) (state->regs[inst->rn]), src2_value);
     state->regs[inst->rd] = (int) (state->regs[inst->rn]) + src2_value;
+    state->analysis.register_reads[inst->rn]++;
+    state->analysis.register_writes[inst->rd]++;
 }
 
 void mov (struct state* state, struct dp_instr* instr)
@@ -112,6 +115,8 @@ void mov (struct state* state, struct dp_instr* instr)
         unsigned int shift = select_bits(instr->src2, 11, 8);
         unsigned int reg = select_bits(instr->src2, 7, 0);
         value = state->regs[reg];
+        state->analysis.register_reads[reg]++;
+
         debug("Value (%d) from r%d shifted by %d", value, reg, shift);
         if (shift != 0) {
             value <<= shift;
@@ -121,6 +126,7 @@ void mov (struct state* state, struct dp_instr* instr)
 
     debug("Set r%d = %d", instr->rd, value);
     state->regs[instr->rd] = value;
+    state->analysis.register_writes[instr->rd]++;
 }
 
 void mvn (struct state* state, struct dp_instr* instr)

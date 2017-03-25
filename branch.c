@@ -17,10 +17,12 @@ void branch_and_exchange (struct state* state, struct dp_instr* inst)
 {
     debug("Branch and exchange", NULL);
     unsigned int rn = select_bits(inst->src2, 3, 0);
+    state->analysis.register_reads[rn]++;
     unsigned int rn_val = state->regs[rn];
     debug("Current value of PC: 0x%02x", state->regs[PC]);
     debug("Current value of LR: 0x%02x", state->regs[LR]);
     state->regs[PC] = rn_val;
+    state->analysis.register_writes[PC]++;
     debug("Update PC to 0x%02x", rn_val);
 }
 
@@ -30,6 +32,8 @@ void armemu_one_branch (struct state* state, struct branch_link_instr* instr)
     if (instr->link) {
         debug("Is link instruction, LR = PC (0x%02x) + 4 = 0x%02x", state->regs[PC], state->regs[PC]+4); 
         state->regs[LR] = state->regs[PC] + 4;
+        state->analysis.register_writes[LR]++;
+        state->analysis.register_reads[PC]++;
     } else {
         debug("NOT a link instruction, LR not updated", NULL);
     }
@@ -47,5 +51,6 @@ void armemu_one_branch (struct state* state, struct branch_link_instr* instr)
     signed int signed_offset = (signed int) raw_offset;
 
     state->regs[PC] = state->regs[PC] + 8 + signed_offset; // 8 simulates prefetch
+    state->analysis.register_writes[PC]++; // in practice, PC is not really read
     debug("Branch to 0x%02x", state->regs[PC]);
 }

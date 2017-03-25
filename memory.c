@@ -27,6 +27,7 @@ struct load_store_instr decode_load_store_instr (unsigned int raw)
 void armemu_one_load_store (struct state* s, struct load_store_instr* instr)
 {
     char* mem_addr = (char*) s->regs[instr->rn];
+    s->analysis.register_reads[instr->rn]++;
     debug("Address before offset: 0x%02x", (unsigned int) mem_addr);
 
     unsigned int offset = 0;
@@ -50,6 +51,7 @@ void armemu_one_load_store (struct state* s, struct load_store_instr* instr)
         // Register offset
         unsigned int rm = select_bits(instr->offset, 3, 0);
         unsigned int rm_val = s->regs[rm];
+        s->analysis.register_reads[rm]++;
         if (select_bits(instr->offset, 4, 4) == 1) {
             fprintf(stderr, "Shift by a register not supported (ref. 4.5.2)\n");
             exit(EXIT_FAILURE);
@@ -85,6 +87,7 @@ void armemu_one_load_store (struct state* s, struct load_store_instr* instr)
         } else {
             s->regs[rd] = *((unsigned int*) mem_addr);
         } // end if byte
+        s->analysis.register_writes[rd]++;
         debug("Load data (0x%02x) from address 0x%02x (incl. offset) to r%d",
               s->regs[rd], (unsigned int) mem_addr, rd);
     } else {
@@ -96,6 +99,7 @@ void armemu_one_load_store (struct state* s, struct load_store_instr* instr)
             unsigned int* word_mem_addr = (unsigned int*) mem_addr;
             *word_mem_addr = s->regs[rd];
         } // end if byte
+        s->analysis.register_reads[rd]++;
         debug("Store data (0x%02x) from r%d to address 0x%02x (incl. offset)",
               s->regs[rd], rd, (unsigned int) mem_addr);
     } // end if load
@@ -128,6 +132,7 @@ void armemu_one_load_store_multiple (struct state* s, struct load_store_multiple
         for (int i = 0 ; i < 17 ; i++) {
             if ( ( instr->regs & (1 << i) ) >> i == 1) {
                 debug("Store r%d (value %d) to address 0x%02x at r%d", i, s->regs[i], (unsigned int) addr, instr->rn);
+                s->analysis.register_reads[i]++;
                 *addr = s->regs[i];
                 addr--;
             }
@@ -137,11 +142,13 @@ void armemu_one_load_store_multiple (struct state* s, struct load_store_multiple
             if ( ( instr->regs & (1 << i) ) >> i == 1) {
                 addr++; // First move SP (or whatever Rn is)
                 debug("Copy value %d from address 0x%02x (r%d) to r%d", *addr, (unsigned int) addr, instr->rn, i);
+                s->analysis.register_writes[i]++;
                 s->regs[i] = *addr;
             }
         } // end for
     } // end if push or pop
 
     s->regs[instr->rn] = (unsigned int) addr;
+    s->analysis.register_writes[instr->rn]++;
 } // end armemu_one_load_store_multiple
 
