@@ -38,11 +38,11 @@ struct state {
 // Assembly function signature
 typedef unsigned int (*func)(unsigned int, unsigned int, unsigned int, unsigned int);
 
-void init_state(struct state* s, 
-                func f, 
-                unsigned int r0, 
-                unsigned int r1,
-                unsigned int r2,
-                unsigned int r3);
+void init_state (struct state* s, 
+                 func f, 
+                 unsigned int r0, 
+                 unsigned int r1,
+                 unsigned int r2,
+                 unsigned int r3);
 
 #endif

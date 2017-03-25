@@ -9,8 +9,8 @@ struct branch_link_instr {
     unsigned int offset   : 24 ;
 };
 
-void branch_and_exchange(struct state* state, struct dp_instr* inst);
+void branch_and_exchange (struct state* state, struct dp_instr* inst);
 struct branch_link_instr decode_branch_link_instr (unsigned int raw);
-void armemu_one_branch(struct state* state, struct branch_link_instr* instr);
+void armemu_one_branch (struct state* state, struct branch_link_instr* instr);
 
 #endif

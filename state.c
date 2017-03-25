@@ -2,12 +2,12 @@
 
 #include "debug_utils.h"
 
-void init_state(struct state* s, 
-                func f, 
-                unsigned int r0, 
-                unsigned int r1,
-                unsigned int r2,
-                unsigned int r3)
+void init_state (struct state* s, 
+                 func f, 
+                 unsigned int r0, 
+                 unsigned int r1,
+                 unsigned int r2,
+                 unsigned int r3)
 {
     s->regs[0] = r0;
     s->regs[1] = r1;

@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-void print_analysis(struct analysis a)
+void print_analysis (struct analysis a)
 {
    printf("# of instructions executed:          %d\n"
           "# of data processing instructions:   %d\n"

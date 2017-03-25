@@ -15,7 +15,7 @@
 #define COND_GE 10
 #define COND_LE 13
 
-const char* condition_to_string(unsigned int cond)
+const char* condition_to_string (unsigned int cond)
 {
     switch(cond) {
         case COND_EQ:

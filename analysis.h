@@ -10,6 +10,6 @@ struct analysis {
     unsigned int branches_not_taken;
 };
 
-void print_analysis(struct analysis a);
+void print_analysis (struct analysis a);
 
 #endif

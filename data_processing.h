@@ -24,6 +24,6 @@ struct dp_instr {
 
 struct dp_instr decode_dp_instr (unsigned int raw);
 
-void armemu_one_dp(struct state* state, struct dp_instr* inst);
+void armemu_one_dp (struct state* state, struct dp_instr* inst);
 
 #endif

@@ -20,11 +20,11 @@
 #define CODE_STM_LDM 4
 
 unsigned int add_function (unsigned int a, unsigned int b, unsigned int c, unsigned int d);
-unsigned int sum_array(unsigned int a, unsigned int b, unsigned int c, unsigned int d);
-unsigned int fib_iter(unsigned int a, unsigned int b, unsigned int c, unsigned int d);
-unsigned int fib_rec(unsigned int a, unsigned int b, unsigned int c, unsigned int d);
-unsigned int find_max(unsigned int a, unsigned int b, unsigned int c, unsigned int d);
-unsigned int find_str(unsigned int a, unsigned int b, unsigned int c, unsigned int d);
+unsigned int sum_array (unsigned int a, unsigned int b, unsigned int c, unsigned int d);
+unsigned int fib_iter (unsigned int a, unsigned int b, unsigned int c, unsigned int d);
+unsigned int fib_rec (unsigned int a, unsigned int b, unsigned int c, unsigned int d);
+unsigned int find_max (unsigned int a, unsigned int b, unsigned int c, unsigned int d);
+unsigned int find_str (unsigned int a, unsigned int b, unsigned int c, unsigned int d);
 
 void armemu_one (struct state* s)
 {
@@ -111,7 +111,7 @@ void armemu_one (struct state* s)
     }
 }
 
-void armemu(struct state* s)
+void armemu (struct state* s)
 {
     while (s->regs[PC] != 0) {
         debug("Instruction #%d", ++s->analysis.instructions); 

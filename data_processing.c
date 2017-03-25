@@ -91,7 +91,7 @@ int get_operand2 (struct state* state, struct dp_instr* inst)
     return src2_value;
 }
 
-void add_or_subtract(struct state* state, struct dp_instr* inst, bool is_add)
+void add_or_subtract (struct state* state, struct dp_instr* inst, bool is_add)
 {
     int src2_value = get_operand2(state, inst);
     if (!is_add) {
@@ -101,7 +101,7 @@ void add_or_subtract(struct state* state, struct dp_instr* inst, bool is_add)
     state->regs[inst->rd] = (int) (state->regs[inst->rn]) + src2_value;
 }
 
-void mov(struct state* state, struct dp_instr* instr)
+void mov (struct state* state, struct dp_instr* instr)
 {
     // rd = src2
     int value;
@@ -123,7 +123,7 @@ void mov(struct state* state, struct dp_instr* instr)
     state->regs[instr->rd] = value;
 }
 
-void mvn(struct state* state, struct dp_instr* instr)
+void mvn (struct state* state, struct dp_instr* instr)
 {
     if (instr->i == 0) {
         fprintf(stderr, "mvn (negative move) with register not supported.\n");
@@ -169,7 +169,7 @@ void multiply (struct state* s, struct dp_instr* inst)
     s->regs[inst->rn] = result;
 }
 
-void armemu_one_dp(struct state* state, struct dp_instr* inst)
+void armemu_one_dp (struct state* state, struct dp_instr* inst)
 {
     switch (inst->cmd) {
         case 0x0:
