@@ -2,6 +2,8 @@
 
 #include "debug_utils.h"
 
+#include <string.h>
+
 void init_state (struct state* s, 
                  func f, 
                  unsigned int r0, 
@@ -9,6 +11,8 @@ void init_state (struct state* s,
                  unsigned int r2,
                  unsigned int r3)
 {
+    memset(s, 0, sizeof(struct state)); // Fill with zeroes
+
     s->regs[0] = r0;
     s->regs[1] = r1;
     s->regs[2] = r2;

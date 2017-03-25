@@ -65,6 +65,7 @@ void armemu_one (struct state* s)
             }
         case OP_SINGLE_DATA_TRANSFER:
             {
+                s->analysis.memory_instructions++;
                 if (cond_true) {
                     struct load_store_instr instr = decode_load_store_instr(*pc_addr);
                     armemu_one_load_store(s, &instr);
@@ -127,7 +128,7 @@ int main (int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
 
-    struct state state = { };
+    struct state state;
 
     if (strcmp(argv[1], "add_function") == 0) {
         init_state(&state, add_function, 10, 11, 12, 13);
