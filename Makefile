@@ -38,7 +38,7 @@ fib_rec.txt:
 	./armemu fib_rec 5 > $(REPORT_DIR)/$@
 
 find_str.txt:
-	./armemu "Les chaussettes de l'archi-duchesse sont-elles seches et archi-seches" "archibald" > $(REPORT_DIR)/$@
+	./armemu find_str "Les chaussettes de l'archi-duchesse sont-elles seches et archi-seches" "archibald" > $(REPORT_DIR)/$@
 
 clean:
 	rm -rf $(OBJS) $(PROG) $(REPORT_DIR)/
