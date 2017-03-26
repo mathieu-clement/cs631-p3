@@ -4,9 +4,9 @@
 
 void print_analysis (struct analysis a)
 {
-    printf("++++++++++++++++++++++++\n"
-           "+  ANALYSIS / REPORT   +\n"
-           "++++++++++++++++++++++++\n\n");
+    printf("########################\n"
+           "#  ANALYSIS / REPORT   #\n"
+           "########################\n\n");
 
     printf("# of instructions executed:          %d\n"
            "# of data processing instructions:   %d\n"
