@@ -18,6 +18,10 @@
 #define ITERS 10000
 #endif
 
+#ifndef SINGLE_STEP_MODE
+#define SINGLE_STEP_MODE 0
+#endif
+
 #define OP_DATA_PROCESSING 0
 #define OP_SINGLE_DATA_TRANSFER 1
 #define OP_BL_OR_MULTIPLE_DATA_TRANSFER 2
@@ -119,11 +123,25 @@ void armemu_one (struct state* s)
     }
 }
 
+void single_step (struct state* s)
+{
+    if(SINGLE_STEP_MODE) {
+        for (int i = 0 ; i <  NUM_REGS ; ++i) {
+            if (s->regs[i] != 0) {
+                printf("r%d = %d\n", i, s->regs[i]);
+            }
+        }
+        printf("Press any key to continue.\n");
+        getchar();
+    }
+}
+
 void armemu (struct state* s)
 {
     while (s->regs[PC] != 0) {
         debug("Instruction #%d", ++s->analysis.instructions); 
         armemu_one(s); 
+        single_step(s);
     }
     debug("Reached function end. %d instructions executed.", s->analysis.instructions);
 }

@@ -1,6 +1,7 @@
 DEBUG=0
 ITERS=100000
-CFLAGS=-g -O0 -W -Wall -Werror -std=c11 -DDEBUG=$(DEBUG) -DITERS=$(ITERS)
+SINGLE_STEP_MODE=0
+CFLAGS=-g -O0 -W -Wall -Werror -std=c11 -DDEBUG=$(DEBUG) -DITERS=$(ITERS) -DSINGLE_STEP_MODE=$(SINGLE_STEP_MODE)
 LDFLAGS=
 DEPS=add_function.o sum_array.o fib_iter.o fib_rec.o find_max.o find_str.o state.o analysis.o data_processing.o branch.o memory.o conditions.o bits.o
 REPORT_DIR=reports
