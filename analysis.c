@@ -22,9 +22,12 @@ void print_analysis (struct analysis a)
            a.branches_not_taken
           );
 
-    printf("Register | # reads | # writes\n");
+    printf("+----------+---------+----------+\n");
+    printf("| Register | # reads | # writes |\n");
+    printf("|----------+---------+----------|\n");
     for (int reg = 0 ; reg < NUM_REGS; ++reg) {
-        printf("r%-7d | %7d | %8d\n", 
+        printf("| r%-7d | %7d | %8d |\n", 
                reg, a.register_reads[reg], a.register_writes[reg]);
     }
+    printf("+----------+---------+----------+\n");
 }
