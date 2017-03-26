@@ -22,6 +22,8 @@ void print_analysis (struct analysis a)
            a.branches_not_taken
           );
 
+    printf("\n");
+
     printf("+----------+---------+----------+\n");
     printf("| Register | # reads | # writes |\n");
     printf("|----------+---------+----------|\n");

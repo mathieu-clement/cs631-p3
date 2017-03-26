@@ -194,7 +194,6 @@ void invoke (
     }
 
     print_analysis(state.analysis);
-    printf("r = %d\n", state.regs[0]);
 }
 
 void check_num_args (int expected, int actual)
