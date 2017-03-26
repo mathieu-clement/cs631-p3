@@ -140,8 +140,8 @@ void invoke (
            "# NATIVE IMPLEMENTATION #\n"
            "#########################\n\n");
 
-    unsigned int native_result = func(a, b, c, d);
-    printf("native r = %d\n", native_result);
+    int native_result = func(a, b, c, d);
+    printf("native r = %d\n\n", native_result);
 
     // Measure performance of native function
     struct tms native_tms_before;
@@ -179,13 +179,17 @@ void invoke (
 
     times(&emulated_tms_after);
 
+    printf("emulated r = %d\n\n", (int) state.regs[0]);
+
     clock_t emulated_utime_n_iters = emulated_tms_after.tms_utime - emulated_tms_before.tms_utime;
     printf("# clock ticks for %d iterations of emulated implementation: %ld\n", ITERS, emulated_utime_n_iters);
     double emulated_utime_avg = emulated_utime_n_iters / (double) ITERS;
     printf("Average per iteration: %lf\n", emulated_utime_avg);
     printf("\n");
-    printf("Emulation is %ld times slower than native implementation.\n", emulated_utime_n_iters / native_utime_n_iters);
-    printf("\n");
+    if (native_utime_n_iters > 0) {
+        printf("Emulation is %ld times slower than native implementation.\n", emulated_utime_n_iters / native_utime_n_iters);
+        printf("\n");
+    }
 
     print_analysis(state.analysis);
     printf("r = %d\n", state.regs[0]);
