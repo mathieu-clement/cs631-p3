@@ -14,7 +14,9 @@
 #include "memory.h"
 #include "state.h"
 
+#ifndef ITERS
 #define ITERS 10000
+#endif
 
 #define OP_DATA_PROCESSING 0
 #define OP_SINGLE_DATA_TRANSFER 1
