@@ -130,7 +130,8 @@ void single_step (struct state* s)
 void armemu (struct state* s)
 {
     while (s->regs[PC] != 0) {
-        debug("Instruction #%d", ++s->analysis.instructions); 
+        s->analysis.instructions++;
+        debug("Instruction #%d", s->analysis.instructions); 
         armemu_one(s); 
         single_step(s);
     }
