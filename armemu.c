@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/times.h>
 
 #include "debug_utils.h"
 
@@ -11,6 +10,7 @@
 #include "branch.h"
 #include "conditions.h"
 #include "data_processing.h"
+#include "func.h"
 #include "memory.h"
 #include "state.h"
 
@@ -27,15 +27,6 @@
 #define OP_BL_OR_MULTIPLE_DATA_TRANSFER 2
 #define CODE_BRANCH 5
 #define CODE_STM_LDM 4
-
-#define FUNC_DEF(name) unsigned int name (unsigned int a, unsigned int b, unsigned int c, unsigned int d)
-
-FUNC_DEF(add_function);
-FUNC_DEF(sum_array);
-FUNC_DEF(fib_iter);
-FUNC_DEF(fib_rec);
-FUNC_DEF(find_max);
-FUNC_DEF(find_str);
 
 void armemu_one (struct state* s)
 {
@@ -144,74 +135,6 @@ void armemu (struct state* s)
         single_step(s);
     }
     debug("Reached function end. %d instructions executed.", s->analysis.instructions);
-}
-
-void invoke (
-        func func, 
-        unsigned int a, 
-        unsigned int b, 
-        unsigned int c,
-        unsigned int d
-        )
-{
-    struct state state;
-
-    printf("#########################\n"
-           "# NATIVE IMPLEMENTATION #\n"
-           "#########################\n\n");
-
-    int native_result = func(a, b, c, d);
-    printf("native r = %d\n\n", native_result);
-
-    // Measure performance of native function
-    struct tms native_tms_before;
-    struct tms native_tms_after;
-
-    times(&native_tms_before);
-
-    for (int i = 0 ; i < ITERS; ++i) {
-        func(a, b, c, d);
-    }
-
-    times(&native_tms_after);
-
-    clock_t native_utime_n_iters = native_tms_after.tms_utime - native_tms_before.tms_utime;
-    printf("# clock ticks for %d iterations of native implementation: %ld\n", ITERS, native_utime_n_iters);
-    double native_utime_avg = native_utime_n_iters / (double) ITERS;
-    printf("Average per iteration: %lf\n", native_utime_avg);
-
-    printf("\n");
-
-    printf("###########################\n"
-           "# EMULATED IMPLEMENTATION #\n"
-           "###########################\n\n");
-
-    // Measure performance of emulated function
-    struct tms emulated_tms_before;
-    struct tms emulated_tms_after;
-
-    times(&emulated_tms_before);
-
-    for (int i = 0 ; i < ITERS; ++i) {
-        init_state(&state, func, a, b, c, d);
-        armemu(&state);
-    }
-
-    times(&emulated_tms_after);
-
-    printf("emulated r = %d\n\n", (int) state.regs[0]);
-
-    clock_t emulated_utime_n_iters = emulated_tms_after.tms_utime - emulated_tms_before.tms_utime;
-    printf("# clock ticks for %d iterations of emulated implementation: %ld\n", ITERS, emulated_utime_n_iters);
-    double emulated_utime_avg = emulated_utime_n_iters / (double) ITERS;
-    printf("Average per iteration: %lf\n", emulated_utime_avg);
-    printf("\n");
-    if (native_utime_n_iters > 0) {
-        printf("Emulation is %ld times slower than native implementation.\n", emulated_utime_n_iters / native_utime_n_iters);
-        printf("\n");
-    }
-
-    print_analysis(state.analysis);
 }
 
 void check_num_args (int expected, int actual)

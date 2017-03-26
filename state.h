@@ -2,6 +2,7 @@
 #define STATE_H
 
 #include "analysis.h"
+#include "func.h"
 
 #define NUM_REGS 16
 #define SP 13
@@ -35,8 +36,6 @@ struct state {
     struct analysis analysis;
 };
 
-// Assembly function signature
-typedef unsigned int (*func)(unsigned int, unsigned int, unsigned int, unsigned int);
 
 void init_state (struct state* s, 
                  func f, 
