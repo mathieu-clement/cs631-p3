@@ -1,0 +1,51 @@
+#########################
+# NATIVE IMPLEMENTATION #
+#########################
+
+native r = 45
+
+# clock ticks for 100000 iterations of native implementation: 1
+Average per iteration: 0.000010
+
+###########################
+# EMULATED IMPLEMENTATION #
+###########################
+
+emulated r = 45
+
+# clock ticks for 100000 iterations of emulated implementation: 922
+Average per iteration: 0.009220
+
+Emulation is 922 times slower than native implementation.
+
+########################
+#  ANALYSIS / REPORT   #
+########################
+
+# of instructions executed:          0
+# of data processing instructions:   42
+# of memory instructions:            11
+# of branches:                       11
+# of branches taken:                 9
+# of branches not taken:             2
+
++----------+---------+----------+
+| Register | # reads | # writes |
+|----------+---------+----------|
+| r0       |      18 |       10 |
+| r1       |       9 |        0 |
+| r2       |      10 |       10 |
+| r3       |       9 |       10 |
+| r4       |      10 |       10 |
+| r5       |       0 |        0 |
+| r6       |       0 |        0 |
+| r7       |       0 |        0 |
+| r8       |       0 |        0 |
+| r9       |       0 |        0 |
+| r10      |       0 |        0 |
+| r11      |       0 |        0 |
+| r12      |       0 |        0 |
+| r13      |       4 |        2 |
+| r14      |       1 |        0 |
+| r15      |       0 |        9 |
++----------+---------+----------+
