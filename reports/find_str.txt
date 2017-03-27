@@ -4,8 +4,8 @@
 
 native r = -1
 
-# clock ticks for 100000 iterations of native implementation: 13
-Average per iteration: 0.000130
+# clock ticks for 10000 iterations of native implementation: 1
+Average per iteration: 0.000100
 
 ###########################
 # EMULATED IMPLEMENTATION #
@@ -13,10 +13,10 @@ Average per iteration: 0.000130
 
 emulated r = -1
 
-# clock ticks for 100000 iterations of emulated implementation: 16343
-Average per iteration: 0.163430
+# clock ticks for 10000 iterations of emulated implementation: 501
+Average per iteration: 0.050100
 
-Emulation is 1257 times slower than native implementation.
+Emulation is 501 times slower than native implementation.
 
 ########################
 #  ANALYSIS / REPORT   #

@@ -4,6 +4,7 @@
 #include "state.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/times.h>
 
 void print_analysis (struct analysis a)
@@ -46,6 +47,12 @@ void invoke (
         unsigned int d
         )
 {
+    int iters = 10; // default value, not important
+    char* iters_char = getenv("ITERS");
+    if (iters_char != NULL) {
+        iters = atoi(iters_char);
+    }
+
     struct state state;
 
     printf("#########################\n"
@@ -61,15 +68,15 @@ void invoke (
 
     times(&native_tms_before);
 
-    for (int i = 0 ; i < ITERS; ++i) {
+    for (int i = 0 ; i < iters; ++i) {
         func(a, b, c, d);
     }
 
     times(&native_tms_after);
 
     clock_t native_utime_n_iters = native_tms_after.tms_utime - native_tms_before.tms_utime;
-    printf("# clock ticks for %d iterations of native implementation: %ld\n", ITERS, native_utime_n_iters);
-    double native_utime_avg = native_utime_n_iters / (double) ITERS;
+    printf("# clock ticks for %d iterations of native implementation: %ld\n", iters, native_utime_n_iters);
+    double native_utime_avg = native_utime_n_iters / (double) iters;
     printf("Average per iteration: %lf\n", native_utime_avg);
 
     printf("\n");
@@ -84,7 +91,7 @@ void invoke (
 
     times(&emulated_tms_before);
 
-    for (int i = 0 ; i < ITERS; ++i) {
+    for (int i = 0 ; i < iters; ++i) {
         init_state(&state, func, a, b, c, d);
         armemu(&state);
     }
@@ -94,8 +101,8 @@ void invoke (
     printf("emulated r = %d\n\n", (int) state.regs[0]);
 
     clock_t emulated_utime_n_iters = emulated_tms_after.tms_utime - emulated_tms_before.tms_utime;
-    printf("# clock ticks for %d iterations of emulated implementation: %ld\n", ITERS, emulated_utime_n_iters);
-    double emulated_utime_avg = emulated_utime_n_iters / (double) ITERS;
+    printf("# clock ticks for %d iterations of emulated implementation: %ld\n", iters, emulated_utime_n_iters);
+    double emulated_utime_avg = emulated_utime_n_iters / (double) iters;
     printf("Average per iteration: %lf\n", emulated_utime_avg);
     printf("\n");
     if (native_utime_n_iters > 0) {

@@ -14,10 +14,6 @@
 #include "memory.h"
 #include "state.h"
 
-#ifndef ITERS
-#define ITERS 10000
-#endif
-
 #ifndef SINGLE_STEP_MODE
 #define SINGLE_STEP_MODE 0
 #endif

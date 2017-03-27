@@ -1,42 +1,41 @@
+sum_array 1 2 3 4 5 6 7 8 9 10
 #########################
 # NATIVE IMPLEMENTATION #
 #########################
 
-native r = 45
+native r = 55
 
-# clock ticks for 100000 iterations of native implementation: 1
-Average per iteration: 0.000010
+# clock ticks for 100000 iterations of native implementation: 0
+Average per iteration: 0.000000
 
 ###########################
 # EMULATED IMPLEMENTATION #
 ###########################
 
-emulated r = 45
+emulated r = 55
 
-# clock ticks for 100000 iterations of emulated implementation: 927
-Average per iteration: 0.009270
-
-Emulation is 927 times slower than native implementation.
+# clock ticks for 100000 iterations of emulated implementation: 364
+Average per iteration: 0.003640
 
 ########################
 #  ANALYSIS / REPORT   #
 ########################
 
-# of instructions executed:          64
-# of data processing instructions:   42
-# of memory instructions:            11
-# of branches:                       11
-# of branches taken:                 9
+# of instructions executed:          70
+# of data processing instructions:   46
+# of memory instructions:            12
+# of branches:                       12
+# of branches taken:                 10
 # of branches not taken:             2
 
 +----------+---------+----------+
 | Register | # reads | # writes |
 |----------+---------+----------|
-| r0       |      18 |       10 |
-| r1       |       9 |        0 |
-| r2       |      10 |       10 |
-| r3       |       9 |       10 |
-| r4       |      10 |       10 |
+| r0       |      20 |       11 |
+| r1       |      10 |        0 |
+| r2       |      11 |       11 |
+| r3       |      10 |       11 |
+| r4       |      11 |       11 |
 | r5       |       0 |        0 |
 | r6       |       0 |        0 |
 | r7       |       0 |        0 |
@@ -47,5 +46,5 @@ Emulation is 927 times slower than native implementation.
 | r12      |       0 |        0 |
 | r13      |       4 |        2 |
 | r14      |       1 |        0 |
-| r15      |       0 |        9 |
+| r15      |       0 |       10 |
 +----------+---------+----------+

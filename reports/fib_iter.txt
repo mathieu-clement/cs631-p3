@@ -1,3 +1,4 @@
+fib_iter 5 1 2 3 4 5 6 7 8 9 10
 #########################
 # NATIVE IMPLEMENTATION #
 #########################
@@ -13,10 +14,10 @@ Average per iteration: 0.000010
 
 emulated r = 5
 
-# clock ticks for 100000 iterations of emulated implementation: 856
-Average per iteration: 0.008560
+# clock ticks for 100000 iterations of emulated implementation: 313
+Average per iteration: 0.003130
 
-Emulation is 856 times slower than native implementation.
+Emulation is 313 times slower than native implementation.
 
 ########################
 #  ANALYSIS / REPORT   #
