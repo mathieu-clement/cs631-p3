@@ -6,7 +6,6 @@ typedef unsigned int (*func)(unsigned int, unsigned int, unsigned int, unsigned 
 
 #define FUNC_DEF(name) unsigned int name (unsigned int a, unsigned int b, unsigned int c, unsigned int d)
 
-FUNC_DEF(add_function);
 FUNC_DEF(sum_array);
 FUNC_DEF(fib_iter);
 FUNC_DEF(fib_rec);

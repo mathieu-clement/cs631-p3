@@ -141,16 +141,34 @@ void armemu (struct state* s)
 void check_num_args (int expected, int actual)
 {
     actual -= 2; // 0 is program name, 1 is function name
-    if (actual != expected) {
+    if (actual < expected) {
         fprintf(stderr, "missing arguments. %d expected, found %d, including program name.\n",
                 expected, actual);
         exit(EXIT_FAILURE);
     }
 }
 
-bool is_function_invocation(char* func_name, char* argv[])
+bool is_function_invocation (char* func_name, char* argv[])
 {
     return strcmp(argv[1], func_name) == 0;
+}
+
+int* read_array (char** str_arr, int n)
+{
+    int* int_arr = (int*) malloc(n * sizeof(int));
+    for (int i = 0 ; i < n ; ++i) {
+        int_arr[i] = atoi(str_arr[i]);
+    }
+    return int_arr;
+}
+
+void invoke_int_array_func(func func, char** argv, int argc)
+{
+        check_num_args(1, argc);
+        int n = argc - 2;
+        int* array = read_array(argv+2, n);
+        invoke(func, (unsigned int) array, n, 0, 0);
+        free(array);
 }
 
 int main (int argc, char* argv[])
@@ -160,14 +178,10 @@ int main (int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
 
-    if (is_function_invocation("add_function", argv)) {
-        invoke(add_function, 10, 11, 12, 13);
-    } else if (is_function_invocation("sum_array", argv)) {
-        int array[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9 } ;
-        invoke(sum_array, (unsigned int) array, 9, 0, 0);
+    if (is_function_invocation("sum_array", argv)) {
+        invoke_int_array_func(sum_array, argv, argc);
     } else if (is_function_invocation("find_max", argv)) {
-        int array[] = { 1, 2, 3, 4, 32, 5, 6, 7, 8, 9 } ;
-        invoke(find_max, (unsigned int) array, 10, 0, 0);
+        invoke_int_array_func(find_max, argv, argc);
     } else if (is_function_invocation("find_str", argv)) {
         check_num_args(2, argc);
         invoke(find_str, (unsigned int) argv[2], (unsigned int) argv[3], 0, 0);
