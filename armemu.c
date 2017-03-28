@@ -158,7 +158,7 @@ int* read_array (char** str_arr, int n)
     return int_arr;
 }
 
-void invoke_int_array_func(func func, char** argv, int argc)
+void invoke_int_array_func (func func, char** argv, int argc)
 {
         check_num_args(1, argc);
         int n = argc - 2;
@@ -167,7 +167,7 @@ void invoke_int_array_func(func func, char** argv, int argc)
         free(array);
 }
 
-void print_usage(char* program_name, FILE* out)
+void print_usage (char* program_name, FILE* out)
 {
     fprintf(out, "Usage: %s function function_arguments\n\n", program_name);
     fprintf(out, "Functions:\n"
@@ -180,9 +180,14 @@ void print_usage(char* program_name, FILE* out)
                  "    sum_array INT...\n"
                  "        Returns the sum of an array of signed integers.\n"
                  "    find_max INT...\n"
-                 "        Returns the maximum from an array of signed integers.\n"
+                 "        Returns the maximum from an array of signed integers.\n\n"
                  );
-
+    fprintf(out, "Compilation options:\n"
+                 "    This program was%s compiled with debug statements.\n"
+                 "    This program was%s compiled with single step mode.\n",
+                 DEBUG==0 ? " NOT" : "",
+                 SINGLE_STEP_MODE==0 ? " NOT" : ""
+                 );
 }
 
 int main (int argc, char* argv[])
