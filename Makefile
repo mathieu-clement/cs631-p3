@@ -26,24 +26,35 @@ create_report_dir:
 	mkdir $(REPORT_DIR) || true
 
 find_max.txt: 
-	echo "find_max 1 2 3 4 5 6 7 8 9 10" > $(REPORT_DIR)/$@
-	ITERS=100000 ./armemu find_max 1 2 3 4 5 6 7 8 9 10 >> $(REPORT_DIR)/$@
+	export ITERS=100000
+	echo > $(REPORT_DIR)/$@
+	./armemu find_max 1 2 3 4 5 6 7 8 9 10 >> $(REPORT_DIR)/$@
+	./armemu find_max -1 -5 -18 -333333 >> $(REPORT_DIR)/$@
+	./armemu find_max 0 0 0 0 0 0 >> $(REPORT_DIR)/$@
 
 sum_array.txt:
-	echo "sum_array 1 2 3 4 5 6 7 8 9 10" > $(REPORT_DIR)/$@
-	ITERS=100000 ./armemu sum_array 1 2 3 4 5 6 7 8 9 10 >> $(REPORT_DIR)/$@
+	export ITERS=100000
+	echo > $(REPORT_DIR)/$@
+	./armemu sum_array 1 2 3 4 5 6 7 8 9 10 >> $(REPORT_DIR)/$@
+	./armemu sum_array -1 -5 -18 -333333 >> $(REPORT_DIR)/$@
+	./armemu sum_array 0 0 0 0 0 0 >> $(REPORT_DIR)/$@
 
 fib_iter.txt:
-	echo "fib_iter 5 1 2 3 4 5 6 7 8 9 10" > $(REPORT_DIR)/$@
-	ITERS=100000 ./armemu fib_iter 5 >> $(REPORT_DIR)/$@
+	export ITERS=100000
+	echo > $(REPORT_DIR)/$@
+	./armemu fib_iter 10 >> $(REPORT_DIR)/$@
+	./armemu fib_iter 19 >> $(REPORT_DIR)/$@
 
 fib_rec.txt:
-	echo "fib_rec 5" > $(REPORT_DIR)/$@
-	ITERS=100000 ./armemu fib_rec 5 >> $(REPORT_DIR)/$@
+	export ITERS=10000
+	echo > $(REPORT_DIR)/$@
+	./armemu fib_rec 10 >> $(REPORT_DIR)/$@
+	./armemu fib_rec 19 >> $(REPORT_DIR)/$@
 
 find_str.txt:
-	echo "find_str \"Les chaussettes...\" \"archibald\"" > $(REPORT_DIR)/$@
-	ITERS=10000 ./armemu find_str "Les chaussettes de l'archi-duchesse sont-elles seches et archi-seches" "archibald" > $(REPORT_DIR)/$@
+	export ITERS=10000
+	./armemu find_str "Les chaussettes de l'archi-duchesse sont-elles seches et archi-seches" "chaussettes" >> $(REPORT_DIR)/$@
+	./armemu find_str "Les chaussettes de l'archi-duchesse sont-elles seches et archi-seches" "archibald" >> $(REPORT_DIR)/$@
 
 clean:
 	rm -rf $(OBJS) $(PROG) $(REPORT_DIR)/
