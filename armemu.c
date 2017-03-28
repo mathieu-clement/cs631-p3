@@ -138,7 +138,7 @@ void check_num_args (int expected, int actual)
 {
     actual -= 2; // 0 is program name, 1 is function name
     if (actual < expected) {
-        fprintf(stderr, "missing arguments. %d expected, found %d, including program name.\n",
+        fprintf(stderr, "missing arguments. %d expected, found %d.\n",
                 expected, actual);
         exit(EXIT_FAILURE);
     }
