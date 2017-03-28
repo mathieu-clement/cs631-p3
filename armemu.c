@@ -167,10 +167,28 @@ void invoke_int_array_func(func func, char** argv, int argc)
         free(array);
 }
 
+void print_usage(char* program_name, FILE* out)
+{
+    fprintf(out, "Usage: %s function function_arguments\n\n", program_name);
+    fprintf(out, "Functions:\n"
+                 "    find_str TEXT QUERY\n"
+                 "        Returns the index of QUERY if found in TEXT.\n"
+                 "    fib_rec N\n"
+                 "        Returns the Nth Fibonacci number, using the recursive method.\n"
+                 "    fib_iter N\n"
+                 "        Returns the Nth Fibonacci number, using the iterative method.\n"
+                 "    sum_array INT...\n"
+                 "        Returns the sum of an array of signed integers.\n"
+                 "    find_max INT...\n"
+                 "        Returns the maximum from an array of signed integers.\n"
+                 );
+
+}
+
 int main (int argc, char* argv[])
 {
     if (argc < 2) {
-        fprintf(stderr, "Usage: %s FUNCTION\n", argv[0]);
+        print_usage(argv[0], stderr);
         exit(EXIT_FAILURE);
     }
 
