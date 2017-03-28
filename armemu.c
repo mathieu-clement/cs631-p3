@@ -40,7 +40,9 @@ void armemu_one (struct state* s)
 
     bool is_branch = false;
     
-    if (dp_instr.cond != COND_AL && cond_true) debug("Condition %s is true", cond_str);
+    if (dp_instr.cond != COND_AL && cond_true) {
+        debug("Condition %s is true", cond_str);
+    }
 
     switch (dp_instr.op) {
         case OP_DATA_PROCESSING:
@@ -100,7 +102,9 @@ void armemu_one (struct state* s)
             exit(EXIT_FAILURE);
     } // end switch
 
-    if (!cond_true) debug("Condition %s is false", cond_str);
+    if (!cond_true) {
+        debug("Condition %s is false", cond_str);
+    }
 
     // Update PC
     if (!is_branch && (!cond_true || dp_instr.rn != PC)) {
@@ -180,14 +184,25 @@ void print_usage (char* program_name, FILE* out)
                  "    sum_array INT...\n"
                  "        Returns the sum of an array of signed integers.\n"
                  "    find_max INT...\n"
-                 "        Returns the maximum from an array of signed integers.\n\n"
+                 "        Returns the maximum from an array of signed integers.\n\n",
+                 NULL
                  );
     fprintf(out, "Compilation options:\n"
-                 "    This program was%s compiled with debug statements.\n"
-                 "    This program was%s compiled with single step mode.\n",
-                 DEBUG==0 ? " NOT" : "",
-                 SINGLE_STEP_MODE==0 ? " NOT" : ""
+                 "    This program was%s compiled with debug statements (DEBUG=%d).\n"
+                 "    This program was%s compiled with single step mode (SINGLE_STEP_MODE=%d).\n",
+                 DEBUG==0 ? " NOT" : "", DEBUG,
+                 SINGLE_STEP_MODE==0 ? " NOT" : "", SINGLE_STEP_MODE
                  );
+}
+
+void print_args (int argc, char* argv[])
+{
+    for (int i = 0 ; i <  argc ; ++i) {
+        printf("%s ", argv[i]);
+    }
+
+    puts("");
+    puts("");
 }
 
 int main (int argc, char* argv[])
@@ -196,6 +211,8 @@ int main (int argc, char* argv[])
         print_usage(argv[0], stderr);
         exit(EXIT_FAILURE);
     }
+
+    print_args(argc, argv); // for the report
 
     if (is_function_invocation("sum_array", argv)) {
         invoke_int_array_func(sum_array, argv, argc);
